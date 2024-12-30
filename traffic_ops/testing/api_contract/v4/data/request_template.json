@@ -1,0 +1,485 @@
+{
+	"cdns": [
+		{
+			"name": "test",
+			"domainName": "quest",
+			"dnssecEnabled": false
+		}
+	],
+	"cachegroup": [
+		{
+			"name": "test",
+			"shortName": "test",
+			"latitude": 38.897663,
+			"longitude": -77.036574,
+			"fallbackToClosest": true,
+			"localizationMethods": [
+				"DEEP_CZ",
+				"CZ",
+				"GEO"
+			],
+			"typeId": 23
+		}
+	],
+	"parameters": [
+		{
+			"name": "test",
+			"value": "quest",
+			"configFile": "records.config",
+			"secure": false
+		}
+	],
+	"roles": [
+		{
+			"name": "test",
+			"description": "quest"
+		}
+	],
+	"profiles": [
+		{
+			"name": "test",
+			"description": "A test profile for API examples",
+			"cdn": 2,
+			"type": "UNK_PROFILE",
+			"routingDisabled": true
+		}
+	],
+	"tenants": [
+		{
+			"active": true,
+			"name": "test",
+			"parentId": 1
+		}
+	],
+	"server_capabilities": [
+		{
+			"name": "RAM"
+		}
+	],
+	"types": [
+		{
+			"name": "MID_LOC",
+			"description": "Mid Logical Location",
+			"useInTable": "cachegroup"
+		}
+	],
+	"status": [
+		{
+			"description": "Server is online and reported in the health protocol.",
+			"name": "REPORTED"
+		}
+	],
+	"divisions": [
+		{
+			"name": "test"
+		}
+	],
+	"regions": [
+		{
+			"name": "test",
+			"division": "4",
+			"divisionName": "England"
+		}
+	],
+	"phys_locations": [
+		{
+			"address": "Buckingham Palace",
+			"city": "London",
+			"comments": "Buckingham Palace",
+			"email": "steve.kingstone@royal.gsx.gov.uk",
+			"name": "test",
+			"phone": "0-843-816-6276",
+			"poc": "Her Majesty The Queen Elizabeth Alexandra Mary Windsor II",
+			"regionId": 1,
+			"shortName": "test",
+			"state": "Westminster",
+			"zip": "SW1A 1AA"
+		}
+	],
+	"servers": [
+		{
+			"cachegroupId": 79,
+			"cdnId": 2,
+			"domainName": "mycdn.ciab.test",
+			"hostName": "mid",
+			"httpsPort": 443,
+			"interfaces": [
+				{
+					"ipAddresses": [
+						{
+							"address": "127.0.0.1",
+							"gateway": "0.0.0.1",
+							"serviceAddress": true
+						}
+					],
+					"maxBandwidth": null,
+					"monitor": true,
+					"mtu": 1500,
+					"name": "eth0"
+				}
+			],
+			"interfaceMtu": 1500,
+			"interfaceName": "eth0",
+			"ip6Address": "::1",
+			"ip6Gateway": "::2",
+			"ipAddress": "127.0.0.1",
+			"ipGateway": "0.0.0.1",
+			"ipNetmask": "255.255.255.0",
+			"physLocationId": 3,
+			"profileNames": [
+				"MID_TIER_ATS_CACHE"
+			],
+			"statusId": 3,
+			"tcpPort": 80,
+			"typeId": 96,
+			"updPending": false
+		}
+	],
+	"delivery_services": [
+		{
+			"active": false,
+			"anonymousBlockingEnabled": false,
+			"ccrDnsTtl": null,
+			"cdnId": 2,
+			"checkPath": null,
+			"consistentHashRegex": null,
+			"consistentHashQueryParams": [],
+			"deepCachingType": "NEVER",
+			"displayName": "test",
+			"dnsBypassCname": null,
+			"dnsBypassIp": null,
+			"dnsBypassIp6": null,
+			"dnsBypassTtl": null,
+			"dscp": 0,
+			"ecsEnabled": true,
+			"edgeHeaderRewrite": null,
+			"firstHeaderRewrite": null,
+			"fqPacingRate": null,
+			"geoLimit": 0,
+			"geoLimitCountries": null,
+			"geoLimitRedirectUrl": null,
+			"geoProvider": 0,
+			"globalMaxMbps": null,
+			"globalMaxTps": null,
+			"httpBypassFqdn": null,
+			"infoUrl": null,
+			"initialDispersion": 1,
+			"innerHeaderRewrite": null,
+			"ipv6RoutingEnabled": false,
+			"lastHeaderRewrite": null,
+			"logsEnabled": true,
+			"longDesc": "A Delivery Service created expressly for API documentation examples",
+			"maxDnsAnswers": null,
+			"missLat": 0,
+			"missLong": 0,
+			"maxOriginConnections": 0,
+			"maxRequestHeaderBytes": 131072,
+			"midHeaderRewrite": null,
+			"multiSiteOrigin": false,
+			"orgServerFqdn": "http://origin.infra.ciab.test",
+			"originShield": null,
+			"profileId": null,
+			"protocol": 0,
+			"qstringIgnore": 0,
+			"rangeRequestHandling": 0,
+			"regexRemap": null,
+			"regionalGeoBlocking": false,
+			"routingName": "test",
+			"serviceCategory": null,
+			"signed": false,
+			"signingAlgorithm": null,
+			"rangeSliceBlockSize": null,
+			"sslKeyVersion": null,
+			"tenant": "root",
+			"tenantId": 1,
+			"tlsVersions": [
+				"1.2",
+				"1.3"
+			],
+			"topology": null,
+			"trRequestHeaders": null,
+			"trResponseHeaders": null,
+			"type": "HTTP",
+			"typeId": 1,
+			"xmlId": "test"
+		}
+	],
+	"origins": [
+		{
+			"deliveryServiceId": 2,
+			"fqdn": "example.com",
+			"name": "test",
+			"port": 80,
+			"protocol": "http",
+			"tenantId": 1
+		}
+	],
+	"asns": [
+		{
+			"asn": 1,
+			"cachegroupId": 10
+		}
+	],
+	"jobs": [
+		{
+			"deliveryService": "test",
+			"invalidationType": "REFRESH",
+			"regex": "/.+",
+			"startTime": "2030-11-09T01:02:03Z",
+			"ttlHours": 72
+		}
+	],
+	"coordinates": [
+		{
+			"name": "test",
+			"latitude": 38.897663,
+			"longitude": -77.036574
+		}
+	],
+	"users": [
+		{
+			"username": "mike",
+			"addressLine1": "22 Mike Wazowski You've Got Your Life Back Lane",
+			"city": "Monstropolis",
+			"compary": "Monsters Inc.",
+			"email": "mwazowski@minc.biz",
+			"fullName": "Mike Wazowski",
+			"localPasswd": "BFFsully",
+			"confirmLocalPasswd": "BFFsully",
+			"newUser": true,
+			"role": "admin",
+			"tenantId": 1
+		}
+	],
+	"topologies": [
+		{
+			"name": "test",
+			"description": "This is my topology",
+			"nodes": [
+				{
+					"cachegroup": "test1"
+				}
+			]
+		}
+	],
+	"steering": [
+		{
+			"targetId": 61,
+			"value": 100,
+			"typeId": 43
+		}
+	],
+	"cdn_notifications": [
+		{
+			"cdn": "cdn1",
+			"notification": "the content of the notification"
+		}
+	],
+	"cdn_locks": [
+		{
+			"cdn": "test",
+			"message": "acquiring lock to snap CDN",
+			"sharedUserNames": [
+				"test"
+			],
+			"soft": true
+		}
+	],
+	"deliveryservice_requests": [
+		{
+			"changeType": "update",
+			"status": "draft",
+			"requested": {
+				"active": false,
+				"anonymousBlockingEnabled": false,
+				"cacheurl": null,
+				"ccrDnsTtl": null,
+				"cdnId": 2,
+				"cdnName": "CDN-in-a-Box",
+				"checkPath": null,
+				"displayName": "test",
+				"dnsBypassCname": null,
+				"dnsBypassIp": null,
+				"dnsBypassIp6": null,
+				"dnsBypassTtl": null,
+				"dscp": 0,
+				"edgeHeaderRewrite": null,
+				"firstHeaderRewrite": null,
+				"geoLimit": 0,
+				"geoLimitCountries": null,
+				"geoLimitRedirectURL": null,
+				"geoProvider": 0,
+				"globalMaxMbps": null,
+				"globalMaxTps": null,
+				"httpBypassFqdn": null,
+				"id": 3,
+				"infoUrl": null,
+				"initialDispersion": 1,
+				"innerHeaderRewrite": null,
+				"ipv6RoutingEnabled": true,
+				"lastHeaderRewrite": null,
+				"lastUpdated": "2020-02-13T16:43:54Z",
+				"logsEnabled": true,
+				"longDesc": "Apachecon North America 2018",
+				"matchList": [
+					{
+						"type": "HOST_REGEXP",
+						"setNumber": 0,
+						"pattern": ".*\\.demo1\\..*"
+					}
+				],
+				"maxDnsAnswers": null,
+				"midHeaderRewrite": null,
+				"missLat": 42,
+				"missLong": -88,
+				"multiSiteOrigin": false,
+				"originShield": null,
+				"orgServerFqdn": "http://origin.infra.ciab.test",
+				"profileDescription": null,
+				"profileId": null,
+				"profileName": null,
+				"protocol": 2,
+				"qstringIgnore": 0,
+				"rangeRequestHandling": 0,
+				"regexRemap": null,
+				"regionalGeoBlocking": false,
+				"remapText": null,
+				"routingName": "video",
+				"signed": false,
+				"sslKeyVersion": 1,
+				"tenantId": 1,
+				"type": "HTTP",
+				"typeId": 1,
+				"xmlId": "test",
+				"exampleURLs": [
+					"http://video.demo1.mycdn.ciab.test",
+					"https://video.demo1.mycdn.ciab.test"
+				],
+				"deepCachingType": "NEVER",
+				"fqPacingRate": null,
+				"signingAlgorithm": null,
+				"tenant": "root",
+				"topology": null,
+				"trResponseHeaders": null,
+				"trRequestHeaders": null,
+				"consistentHashRegex": null,
+				"consistentHashQueryParams": [
+					"abc",
+					"pdq",
+					"xxx",
+					"zyx"
+				],
+				"maxOriginConnections": 0,
+				"ecsEnabled": false,
+				"serviceCategory": null,
+				"tlsVersions": null
+			}
+		}
+	],
+	"delivery_service_sslkeys": [
+		{
+			"key": "demo1",
+			"businessUnit": "CDN Engineering",
+			"version": 3,
+			"cdn": "CDN-in-a-Box",
+			"hostname": "tr.ds-01.ott.kabletown.com",
+			"country": "US",
+			"organization": "Kabletown",
+			"city": "Denver",
+			"state": "Colorado"
+		}
+	],
+	"delivery_services_regex": [
+		{
+			"pattern": ".*\\.foo-bar\\..*",
+			"type": 33,
+			"setNumber": 1
+		}
+	],
+	"cdn_federation": [
+		{
+			"cname": "test.quest.",
+			"ttl": 48,
+			"description": "A test federation"
+		}
+	],
+	"user_federation": [
+		{
+			"userIds": [
+				2
+			],
+			"replace": true
+		}
+	],
+	"delivery_service_federation": [
+		{
+			"dsIds": [
+				37
+			],
+			"replace": true
+		}
+	],
+	"federation_federation_resolver":[
+		{
+			"fedResolverIds": [39],
+			"replace": true
+		}
+	],
+	"delivery_service_required_capabilities": [
+		{
+			"deliveryServiceID": 1,
+			"requiredCapability": "disk"
+		}
+	],
+	"delivery_service_request_comments": [
+		{
+			"deliveryServiceRequestId": 2,
+			"value": "Does anyone have time to review my delivery service request?"
+		}
+	],
+	"profile_parameters": [
+		{
+			"profileId": 18,
+			"parameterId": 2
+		},
+		{
+			"profileId": 18,
+			"parameterId": 3
+		}
+	],
+	"service_category": [
+		{
+			"name": "SERVICE-CATEGORY-NAME"
+      }
+	],
+	"federation_resolver": [
+		{
+			"ipAddress": "::1/1",
+			"typeId": 37
+		}
+	],
+	"static_dns_entries": [
+		{
+			"address": "2001::cafe:c935",
+			"deliveryserviceId": 37,
+			"host": "test",
+			"ttl": 300,
+			"typeId": 41
+		}
+	],
+  "server_server_capabilities":[
+		{
+			"serverId": 1,
+			"serverCapability": "disk"
+    	}
+  	],
+	  "logs":[
+		{
+			"ticketNum": null,
+			"level": "APICHANGE",
+			"user": "admin",
+			"id": 444,
+			"message": "log for test purposes"
+		}
+	]
+}

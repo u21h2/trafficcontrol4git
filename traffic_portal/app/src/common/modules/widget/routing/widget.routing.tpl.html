@@ -1,0 +1,145 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<div class="x_title">
+    <h2>Routing Methods</h2>
+    <div class="clearfix"></div>
+</div>
+<div class="x_content">
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="cz-meter">Coverage Zone</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="cz-meter" min="0" max="100" value="{{native | number:3}}"> {{native | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{native | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="deep-cz-meter">Deep Coverage Zone</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="deep-cz-meter" min="0" max="100" value="{{deepCoverageZone | number:3}}"> {{deepCoverageZone | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{deepCoverageZone | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="third-party-meter">3rd Party (MaxMind)</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="third-party-meter" min="0" max="100" value="{{thirdParty | number:3}}"> {{thirdParty | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{thirdParty | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="fed-meter">Federated</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="fed-meter" min="0" max="100" value="{{federated | number:3}}"> {{federated | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{federated | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="miss-meter">Miss</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="miss-meter" min="0" max="100" value="{{miss | number:3}}"> {{miss | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{miss | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="static-meter">Static</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="static-meter" min="0" max="100" value="{{static | number:3}}"> {{static | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{static | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="dsr-meter">DS Overflow</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="dsr-meter" min="0" max="100" value="{{dsr | number:3}}"> {{dsr | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{dsr | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="err-meter">Error</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="err-meter" min="0" max="100" value="{{error | number:3}}"> {{error | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{error | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="reg-alt-meter">Regional Alternate</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="reg-alt-meter" min="0" max="100" value="{{regionalAlternate | number:3}}"> {{regionalAlternate | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{regionalAlternate | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="widget_summary" style="margin-bottom: 20px;">
+        <div class="w_left w_25">
+            <label for="reg-den-meter">Regional Denied</label>
+        </div>
+        <div class="w_center w_55">
+            <meter id="reg-den-meter" min="0" max="100" value="{{regionalDenied | number:3}}"> {{regionalDenied | number:3}}% </meter>
+        </div>
+        <div class="w_right w_20">
+            <span>{{regionalDenied | number:3}}%</span>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>

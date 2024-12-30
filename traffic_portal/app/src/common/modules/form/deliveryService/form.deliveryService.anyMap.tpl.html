@@ -1,0 +1,402 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<div class="x_panel">
+    <div class="x_title">
+        <ol class="breadcrumb pull-left">
+            <li ng-if="!settings.isRequest"><a href="/#!/delivery-services">Delivery Services</a></li>
+            <li ng-if="settings.isRequest"><a href="/#!/delivery-service-requests">Delivery Service Requests</a></li>
+            <li ng-if="settings.isRequest" class="active">{{dsRequest.changeType}}</li>
+            <li><a ng-click="navigateToPath('/delivery-services/' + deliveryService.id + '?dsType=' + deliveryService.type)">{{deliveryServiceName}}</a></li>
+        </ol>
+        <div class="pull-right" role="group" ng-if="settings.isRequest">
+            <div class="btn-group" role="group" uib-dropdown is-open="status.isopen">
+                <button ng-disabled="dsRequest.status == 'rejected' || dsRequest.status == 'complete'" type="button" class="btn btn-link dropdown-toggle" uib-dropdown-toggle aria-haspopup="true" aria-expanded="false">
+                    {{dsRequest.status | uppercase }}&nbsp;
+                    <span ng-show="dsRequest.status == 'draft' || dsRequest.status == 'submitted' || dsRequest.status == 'pending'" class="caret"></span>
+                </button>
+                <ul class="dropdown-menu-right dropdown-menu" uib-dropdown-menu>
+                    <li role="menuitem"><a ng-if="dsRequest.status == 'submitted'" ng-click="editStatus('draft')">Change status to: DRAFT</a></li>
+                    <li role="menuitem"><a ng-if="dsRequest.status == 'draft'" ng-click="editStatus('submitted')">Change status to: SUBMITTED</a></li>
+                    <li role="menuitem"><a ng-if="dsRequest.status == 'pending'" ng-click="editStatus('complete')">Change status to: COMPLETE</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="pull-right" role="group">
+            <button type="button" class="btn btn-primary" ng-click="showSensitive = !showSensitive">Toggle Sensitive Field Blur</button>
+            <button type="button" class="btn btn-danger" ng-if="!settings.isNew && !settings.isRequest" ng-disabled="!deletable()" ng-click="confirmDelete(deliveryService)">{{settings.deleteLabel}}</button>
+            <button class="btn btn-success" ng-if="!settings.isRequest" ng-disabled="deliveryServiceForm.$pristine || deliveryServiceForm.$invalid || !saveable()" ng-click="save(deliveryService)">{{settings.saveLabel}}</button>
+            <button type="button" class="btn btn-primary" ng-if="!settings.isRequest && !settings.isNew" title="Delivery Service Charts" ng-if="showChartsButton" ng-click="openCharts(deliveryService)"><i class="fa fa-bar-chart fa-fw"></i></button>
+            <div class="btn-group" ng-if="!settings.isRequest && !settings.isNew" role="group" uib-dropdown is-open="more.isopen">
+                <button name="moreBtn" type="button" class="btn btn-default dropdown-toggle" uib-dropdown-toggle aria-haspopup="true" aria-expanded="false">
+                    More&nbsp;
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu-right dropdown-menu" uib-dropdown-menu>
+                    <li role="menuitem"><a ng-href="/#!/delivery-services/{{deliveryService.id}}/clone?dsType={{deliveryService.type}}">Clone Delivery Service</a></li>
+                    <hr class="divider"/>
+                    <li role="menuitem"><a ng-href="/#!/delivery-services/{{deliveryService.id}}/charts">View Charts</a></li>
+                    <li role="menuitem" ng-if="!settings.isRequest"><a ng-href="/#!/delivery-service-requests?xmlId={{deliveryService.xmlId}}">View Change Requests</a></li>
+                    <hr class="divider"/>
+                    <li role="menuitem"><a ng-href="/#!/delivery-services/{{deliveryService.id}}/servers">Manage Servers</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+        <form id="deliveryServiceForm" name="deliveryServiceForm" class="form-horizontal form-label-left">
+            <fieldset>
+                <legend ng-class="{'fieldset-error': generalConfig.$invalid}" ng-click="showGeneralConfig = !showGeneralConfig">General Configuration Settings <i class="fa" ng-class="showGeneralConfig ? 'fa-caret-down' : 'fa-caret-up'"></i></legend>
+                <ng-form name="generalConfig" ng-show="showGeneralConfig">
+
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.xmlId), 'has-feedback': hasError(generalConfig.xmlId)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="xmlId">XML_ID (Key) *<div class="helptooltip">
+                            <div class="helptext">This id becomes a part of the CDN service domain in the form <samp>http://cdn.service-key.company.com/</samp>. Must be all lowercase, no spaces or special characters. May contain dashes.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input id="xmlId" name="xmlId" type="text" class="form-control" placeholder="Unique id used for the delivery service" ng-model="deliveryService.xmlId" required maxlength="48" pattern="[a-z0-9]([a-z0-9\-]*[a-z0-9])?" ng-readonly="(!settings.isRequest && !settings.isNew) || (settings.isRequest && changeType == 'update')">
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.xmlId, 'required')">Required</small>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.xmlId, 'maxlength')">Too Long</small>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.xmlId, 'pattern')">Must be a valid DNS label (no special characters, capital letters, periods, underscores, or spaces and cannot begin or end with a hyphen)</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.xmlId != dsCurrent.xmlId">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.xmlId}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.displayName), 'has-feedback': hasError(generalConfig.displayName)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="displayName">Display Name *<div class="helptooltip">
+                            <div class="helptext">Name of the service that appears in the Traffic portal. No character restrictions.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input id="displayName" name="displayName" type="text" class="form-control" ng-model="deliveryService.displayName" maxlength="48" required>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.displayName, 'required')">Required</small>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.displayName, 'maxlength')">Too Long</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.displayName != dsCurrent.displayName">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.displayName}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.active), 'has-feedback': hasError(generalConfig.active)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="active">Active *<div class="helptooltip">
+                            <div class="helptext">
+								Whether or not this Delivery Service is active on the CDN and is capable of serving traffic.
+                                <br>
+                                <br>
+                                <a href="https://traffic-control-cdn.readthedocs.io/en/latest/overview/delivery_services.html#active" target="_blank">See Delivery Service Active States.</a>
+							</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="active" name="active" class="form-control" ng-model="deliveryService.active" required>
+                                <option disabled hidden value="">Select...</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="PRIMED">{{exposeInactive ? 'Primed' : 'Inactive'}}</option>
+								<option ng-if="exposeInactive" value="INACTIVE">Inactive</option>
+                            </select>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.active, 'required')">Required</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.active != dsCurrent.active">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::formatCurrentActive()}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.type), 'has-feedback': hasError(generalConfig.type)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="type">Content Routing Type *<div class="helptooltip">
+                            <div class="helptext">
+                                DNS is the standard routing type for most CDN services. HTTP Redirect is a specialty routing service that is primarily used for video and large file downloads where localization and latency are significant concerns. A "Live" routing type should be used for all live services.
+                                <br>
+                                <br>
+                                <a href="https://traffic-control-cdn.readthedocs.io/en/latest/overview/delivery_services.html#ds-types" target="_blank">See Delivery Service Types.</a>
+                            </div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="type" name="type" class="form-control" ng-model="deliveryService.typeId" ng-options="type.id as type.name for type in types" required>
+                                <option selected disabled hidden value="">Select...</option>
+                            </select>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.type, 'required')">Required</small>
+                            <small ng-show="deliveryService.typeId"><a href="/#!/types/{{deliveryService.typeId}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.typeId != dsCurrent.typeId">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.type}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.tenantId), 'has-feedback': hasError(generalConfig.tenantId)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="tenantId">Tenant *<div class="helptooltip">
+                            <div class="helptext">Name of company or division of company who owns account. Allows you to group your services and control access. Tenants are setup as a simple hierarchy where you may create parent / child accounts.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <tree-select handle="tenantId" on-update="deliveryService.tenantId=value" tree-data="[tenants[0]]" initial-value="deliveryService.tenantId"></tree-select>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.tenantId, 'required')">Required</small>
+                            <small ng-show="deliveryService.tenantId"><a href="/#!/tenants/{{deliveryService.tenantId}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.tenantId != dsCurrent.tenantId">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.tenant}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.cdn), 'has-feedback': hasError(generalConfig.cdn)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="cdn">CDN *<div class="helptooltip">
+                            <div class="helptext">The CDN to which the Delivery Service belongs.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="cdn" name="cdn" class="form-control" ng-model="deliveryService.cdnId" ng-options="cdn.id as cdn.name for cdn in cdns" required>
+                                <option hidden disabled selected value="">Select...</option>
+                            </select>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.cdnId, 'required')">Required</small>
+                            <small ng-show="deliveryService.cdnId"><a href="/#!/cdns/{{deliveryService.cdnId}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.cdnId != dsCurrent.cdnId">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.cdnName}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.topology), 'has-feedback': hasError(generalConfig.topology)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="topology">Topology<div class="helptooltip">
+                            <div class="helptext">A topology is used to determine the caching layers and path to a delivery service's origin.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="topology" name="topology" class="form-control" ng-model="deliveryService.topology" ng-options="topology.name as topology.name for topology in topologies | orderBy:'name'">
+                                <option selected value="">None</option>
+                            </select>
+                            <small ng-show="deliveryService.topology"><a href="/#!/topologies/edit?name={{deliveryService.topology}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.topology !== dsCurrent.topology">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.topology}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="restrictTLS">
+                            Restrict TLS Versions
+                            <div class="helptooltip">
+                                <div class="helptext">
+                                    Limit the TLS versions that cache servers will accept for HTTPs connections.
+                                    <aside class="warning">
+                                        <h6>Warning</h6>
+                                        <p>Setting TLS Versions that are explicitly supported may break older clients that can't use the specified versions</p>
+                                    </aside>
+                                </div>
+                            </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12" style="display:inline-grid;grid-template-columns:auto;justify-content:start;">
+                            <input
+                                type="checkbox"
+                                id="restrictTLS"
+                                name="restrictTLS"
+                                class="form-control"
+                                ng-model="restrictTLS"
+                                style="max-width: max-content; min-width: 1em;"
+                                ng-change="toggleTLSRestrict()"
+                            />
+                            <small class="input-warning" ng-if="restrictTLS && dsCurrent.protocol === 0">Delivery Service doesn't use HTTPS - this will have no effect</small>
+                        </div>
+                    </div>
+                    <div
+                        class="form-group"
+                        ng-if="restrictTLS"
+                        ng-repeat="ver in deliveryService.tlsVersions track by $index"
+                        ng-class="{'has-error': tlsVersionHasError($index), 'has-feedback': tlsVersionHasError($index)}"
+                    >
+                        <div>
+                            <label class="control-label col-md-2 col-sm-2 col-xs-12" for="tlsVersion1">
+                                TLS Version #{{$index+1}}
+                            </label>
+                            <div class="col-md-10 col-sm-10 col-xs-12">
+                                <div>
+                                    <div class="input-group add-more-inputs">
+                                        <input
+                                            id="tlsVersion{{$index+1}}"
+                                            name="tlsVersion{{$index+1}}"
+                                            type="text"
+                                            class="form-control"
+                                            ng-model="deliveryService.tlsVersions[$index]"
+                                            pattern="[0-9]+\.[0-9]+"
+                                            placeholder="1.3"
+                                            required
+                                            ng-change="validateTLS()"
+                                        />
+                                        <span class="form-input-group-btn input-group-btn">
+                                            <button
+                                                type="button"
+                                                title="remove support for this TLS version"
+                                                class="btn btn-default"
+                                                ng-show="deliveryService.tlsVersions.length > 1"
+                                                ng-click="removeTLSVersion($index)"
+                                            >
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                title="add a supported TLS version"
+                                                class="btn btn-default"
+                                                ng-click="addTLSVersion($index)"
+                                            >
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <small class="input-error" ng-show="tlsVersionHasPropertyError($index, 'duplicates')">Duplicate TLS Version</small>
+                                <small class="input-error" ng-show="tlsVersionHasPropertyError($index, 'required')">Required</small>
+                                <small class="input-error" ng-show="tlsVersionHasPropertyError($index, 'pattern')">Invalid version number - must be "X.Y"</small>
+                                <small class="input-warning" ng-show="tlsVersionInsecure(ver)">TLS Version {{ver}} is known to be insecure!</small>
+                                <small class="input-warning" ng-show="tlsVersionUnknown(ver)">Unknown version</small>
+                                <aside class="current-value" ng-if="settings.isRequest" ng-show="dsCurrent.tlsVersions instanceof Array && dsCurrent.tlsVersions.length === deliveryService.tlsVersions.length && dsCurrent.tlsVersions[$index] !== dsCurrent.tlsVersions[$index]">
+                                    <h3 ng-if="open()">Current Value</h3>
+                                    <h3 ng-if="!open()">Previous Value</h3>
+                                    <pre>{{::dsCurrent.tlsVersions[$index]}}</pre>
+                                </aside>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.serviceCategory), 'has-feedback': hasError(generalConfig.serviceCategory)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="serviceCategory">Service Category<div class="helptooltip">
+                                <div class="helptext">The type of content being delivered. Some examples are linear and vod.</div>
+                            </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="serviceCategory" name="serviceCategory" class="form-control" ng-model="deliveryService.serviceCategory" ng-options="serviceCategory.name as serviceCategory.name for serviceCategory in serviceCategories">
+                                <option value="">Select...</option>
+                            </select>
+                            <small ng-show="deliveryService.serviceCategory"><a href="/#!/service-categories/edit?name={{deliveryService.serviceCategory}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.serviceCategory != dsCurrent.serviceCategory">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.serviceCategory}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.longDesc), 'has-feedback': hasError(generalConfig.longDesc)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="longDesc">Long Description<div class="helptooltip">
+                            <div class="helptext">Free text field not currently used in configuration.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <textarea id="longDesc" name="longDesc" class="form-control" ng-model="deliveryService.longDesc" spellcheck="true" rows="3"></textarea>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.longDesc != dsCurrent.longDesc">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.longDesc}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.profile), 'has-feedback': hasError(generalConfig.profile)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="profile">Profile<div class="helptooltip">
+                            <div class="helptext">Only used if a Delivery Service uses configurations that specifically require a profile. Example: Multi-Site Origin configurations would require a Delivery Service Profile to be used.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <select id="profile" name="profile" class="form-control" ng-model="deliveryService.profileId" ng-options="profile.id as profile.name for profile in profiles">
+                                <option selected value="">None</option>
+                            </select>
+                            <small ng-show="deliveryService.profileId"><a href="/#!/profiles/{{deliveryService.profileId}}" target="_blank">View Details&nbsp;&nbsp;<i class="fa fs-xs fa-external-link"></i></a></small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.profileId != dsCurrent.profileId">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.profileName}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.infoUrl), 'has-feedback': hasError(generalConfig.infoUrl)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="infoUrl">Info URL<div class="helptooltip">
+                            <div class="helptext">Free text field used to enter a URL which provides information about the service.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input id="infoUrl" name="infoUrl" type="url" title="Must be a valid URL." class="form-control" ng-model="deliveryService.infoUrl" maxlength="255">
+                            <small class="input-error invalid-URL-error">Invalid URL</small>
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.infoUrl, 'maxlength')">Too Long</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.infoUrl != dsCurrent.infoUrl">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.infoUrl}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'has-error': hasError(generalConfig.checkPath), 'has-feedback': hasError(generalConfig.checkPath)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="checkPath">Check Path<div class="helptooltip">
+                            <div class="helptext">A path (e.g. <samp>/crossdomain.xml</samp>) with which to verify the connection to the origin server. This can be used by Check Extension scripts to do periodic health checks against the Delivery Service.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input id="checkPath" name="checkPath" type="text" class="form-control" ng-model="deliveryService.checkPath" maxlength="255">
+                            <small class="input-error" ng-show="hasPropertyError(generalConfig.checkPath, 'maxlength')">Too Long</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.checkPath != dsCurrent.checkPath">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.checkPath}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-2 col-sm-2 col-xs-12" for="lastUpdated">
+                            Last Updated
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <input id="lastUpdated" type="text" class="form-control" ng-model="deliveryService.lastUpdated" readonly />
+                        </div>
+                    </div>
+                </ng-form>
+            </fieldset>
+            <fieldset>
+                <legend ng-class="{'fieldset-error': cacheConfig.$invalid}" ng-click="showCacheConfig = !showCacheConfig">Cache Configuration Settings <i class="fa" ng-class="showCacheConfig ? 'fa-caret-down' : 'fa-caret-up'"></i></legend>
+                <ng-form name="cacheConfig" ng-show="showCacheConfig">
+                    <div class="form-group" ng-class="{'has-error': hasError(cacheConfig.remapText), 'has-feedback': hasError(cacheConfig.remapText)}">
+                        <label class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12" for="remapText">Raw remap text *<div class="helptooltip">
+                            <div class="helptext">For HTTP and DNS Delivery Services, this will get added to the end of the remap line verbatim on cache servers. For ANY_MAP Delivery Services this is the entire remap line.</div>
+                        </div>
+                        </label>
+                        <div class="col-md-10 col-sm-10 col-xs-12">
+                            <textarea id="remapText" name="remapText" class="form-control" ng-class="{'private-text': !showSensitive}" ng-model="deliveryService.remapText" ng-pattern="/^[^\n\r]*$/" rows="3" required></textarea>
+                            <small class="input-error" ng-show="hasPropertyError(cacheConfig.remapText, 'pattern')">No Line Breaks</small>
+                            <aside class="current-value" ng-if="settings.isRequest" ng-show="deliveryService.remapText != dsCurrent.remapText">
+                                <h3 ng-if="open()">Current Value</h3>
+                                <h3 ng-if="!open()">Previous Value</h3>
+                                <pre>{{::dsCurrent.remapText}}</pre>
+                            </aside>
+                        </div>
+                    </div>
+                </ng-form>
+            </fieldset>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" ng-if="!settings.isNew" ng-disabled="!deletable()" ng-click="confirmDelete(deliveryService)">{{settings.deleteLabel}}</button>
+                <button class="btn btn-success" ng-disabled="deliveryServiceForm.$pristine || deliveryServiceForm.$invalid || !saveable()" ng-click="save(deliveryService)">{{settings.saveLabel}}</button>
+                <button class="btn btn-primary" ng-if="settings.isRequest && fulfillable()" ng-disabled="deliveryServiceForm.$invalid || deliveryServiceForm.$dirty" ng-click="fulfillRequest(deliveryService)">Fulfill Request</button>
+                <button class="btn btn-primary" ng-if="settings.isRequest && dsRequest.status == 'pending'" ng-click="editStatus('complete')">Complete Request</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,271 @@
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<mat-card appearance="outlined" class="page-content">
+	<mat-card-header class="actions-container" *ngIf="!isNew && server">
+		<button [disabled]="!isCache() || true" mat-button type="button">Manage Capabilities</button>
+		<button [disabled]="!isCache() || true" mat-button type="button">Manage Delivery Services</button>
+		<button [disabled]="!isCache()" mat-icon-button type="button" title="queue server updates" *ngIf="!server.updPending" (click)="queue()"><mat-icon>check</mat-icon></button>
+		<button [disabled]="!isCache()" mat-icon-button type="button" title="clear server updates" *ngIf="server.updPending" (click)="dequeue()"><mat-icon>schedule</mat-icon></button>
+		<button type="button" mat-icon-button title="change server status" (click)="changeStatus($event)"><mat-icon>{{statusChangeIcon()}}</mat-icon></button>
+	</mat-card-header>
+	<tp-loading *ngIf="!server"></tp-loading>
+	<form ngNativeValidate #serverForm="ngForm" class="triple-column-responsive" (ngSubmit)="submit($event)">
+		<mat-card-content *ngIf="server" class="container">
+			<mat-form-field>
+				<mat-label>Host Name</mat-label>
+				<input matInput [(ngModel)]="server.hostName" name="hostname" required maxlength="50"/>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Domain Name</mat-label>
+				<input matInput [(ngModel)]="server.domainName" name="domainname" required maxlength="50"/>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>CDN</mat-label>
+				<mat-select name="cdn" [(ngModel)]="server.cdnId" required>
+					<mat-option *ngFor="let cdn of cdns" [value]="cdn.id">{{cdn.name}}</mat-option>
+				</mat-select>
+				<mat-hint>
+					<a mat-icon-button [disabled]="!server.cdnId" class="small-icon-button" matTooltip="View CDN Details" aria-label="View CDN Details" color="primary" [routerLink]="'/core/cdns/' + server.cdnId" target="_blank">
+						<mat-icon>link</mat-icon>
+					</a>
+				</mat-hint>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Cache Group</mat-label>
+				<mat-select name="cachegroup" [(ngModel)]="server.cachegroupId" required>
+					<mat-option *ngFor="let cg of cacheGroups" [value]="cg.id">{{cg.name}}</mat-option>
+				</mat-select>
+				<mat-hint>
+					<a mat-icon-button [disabled]="!server.cachegroupId" class="small-icon-button" matTooltip="View Cache Group Details" aria-label="View Cache Group Details" color="primary" [href]="'/core/cache-groups/' + server.cachegroupId" target="_blank">
+						<mat-icon>link</mat-icon>
+					</a>
+				</mat-hint>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Physical Location</mat-label>
+				<mat-select name="physLocation" [(ngModel)]="server.physLocationId" required>
+					<mat-option *ngFor="let physLocation of physicalLocations" [value]="physLocation.id">{{physLocation.name}}</mat-option>
+				</mat-select>
+				<mat-hint>
+					<a mat-icon-button [disabled]="!server.physLocationId" class="small-icon-button" matTooltip="View Physical Location Details" aria-label="View Physical Location Details" color="primary" [href]="'/core/phys-locs/' + server.physLocationId" target="_blank">
+						<mat-icon>link</mat-icon>
+					</a></mat-hint>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Status</mat-label>
+				<input matInput name="status" disabled [value]="server.status" *ngIf="!isNew"/>
+				<mat-select name="status" *ngIf="isNew" [(ngModel)]="server.statusId" required>
+					<mat-option *ngFor="let status of statuses" [value]="status.id">{{status.name}}</mat-option>
+				</mat-select>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew && server.offlineReason">
+				<mat-label>Offline Reason</mat-label>
+				<input matInput name="offlineReason" disabled [value]="server.offlineReason"/>
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Type</mat-label>
+				<mat-select name="type" [(ngModel)]="server.typeId" required>
+					<mat-option *ngFor="let type of types" [value]="type.id">{{type.name}}</mat-option>
+				</mat-select>
+				<mat-hint>
+					<a mat-icon-button [disabled]="!server.typeId" class="small-icon-button" color="primary" aria-label="View Type Details" matTooltip="View Type Details" [href]="'/core/types/' + server.typeId" target="_blank">
+						<mat-icon>link</mat-icon>
+					</a></mat-hint>
+			</mat-form-field>
+			<div>
+				<mat-form-field>
+					<mat-label>HTTP Port</mat-label>
+					<input matInput name="httpport" type="number" [(ngModel)]="server.tcpPort" min="1" max="65535"/>
+				</mat-form-field>
+				<mat-form-field>
+					<mat-label>HTTPS Port</mat-label>
+					<input matInput name="httpsport" type="number" [(ngModel)]="server.httpsPort" min="1" max="65535"/>
+				</mat-form-field>
+			</div>
+			<mat-form-field>
+				<mat-label>Rack</mat-label>
+				<input matInput name="rack" [(ngModel)]="server.rack"/>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew">
+				<mat-label>ID</mat-label>
+				<input name="serverId" matInput type="number" [value]="server.id" disabled/>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew && server.lastUpdated">
+				<mat-label>Last Updated</mat-label>
+				<input matInput name="lastUpdated" [value]="server.lastUpdated.toLocaleString()" disabled/>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew">
+				<mat-label>Hash ID</mat-label>
+				<input matInput disabled name="xmppId" [value]="server.xmppId"/>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew && server.statusLastUpdated">
+				<mat-label>Status Last Updated</mat-label>
+				<input matInput name="statusLastUpdated" disabled [value]="server.statusLastUpdated.toLocaleString()"/>
+			</mat-form-field>
+			<mat-expansion-panel [expanded]="true">
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						Profiles
+					</mat-panel-title>
+				</mat-expansion-panel-header>
+				<div class="expansion-content-profile">
+					<mat-form-field>
+						<mat-label>Profiles</mat-label>
+						<mat-select name="profiles" [(ngModel)]="server.profileNames" multiple required>
+							<mat-option *ngFor="let profile of profiles"  [value]="profile.name">{{profile.name}}</mat-option>
+						</mat-select>
+					</mat-form-field>
+					<div class="profile-order">
+						Ordering
+						<mat-list class="drop-list mat-elevation-z3" cdkDropList (cdkDropListDropped)="drop($event)">
+							<mat-list-item class="drop-list-item mat-elevation-z1" *ngFor="let profile of server.profileNames; index as i" cdkDrag>
+								{{i+1}}: {{profile}}
+								<a class="small-icon-button" aria-label="View Profile Details" matTooltip="View Profile Details" color="primary" mat-icon-button [href]="'/core/profiles/' + profileNameToId(profile)" target="_blank">
+									<mat-icon>link</mat-icon>
+								</a>
+							</mat-list-item>
+						</mat-list>
+					</div>
+				</div>
+			</mat-expansion-panel>
+			<mat-expansion-panel [expanded]="true">
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						Interfaces
+					</mat-panel-title>
+					<mat-panel-description class="expansion-description">
+						<button aria-label="Add An Interface" class="panel-button" color="primary" mat-icon-button type="button" (click)="addInterface($event)">
+							<mat-icon>add</mat-icon>
+						</button>
+					</mat-panel-description>
+				</mat-expansion-panel-header>
+				<div class="expansion-container">
+					<mat-accordion multi>
+						<mat-expansion-panel *ngFor="let inf of server.interfaces; index as infInd" [expanded]="true">
+							<mat-expansion-panel-header>
+								<mat-panel-title>
+									{{getInterfaceName(inf)}}
+								</mat-panel-title>
+								<mat-panel-description class="expansion-description">
+									<button class="panel-button" color="warn" mat-icon-button type="button" (click)="deleteInterface($event, infInd)">
+										<mat-icon>delete</mat-icon>
+									</button>
+								</mat-panel-description>
+							</mat-expansion-panel-header>
+							<div class="expansion-content">
+								<mat-form-field>
+									<mat-label>Name</mat-label>
+									<input matInput id="{{inf.name}}-name" name="{{inf.name}}-name" [(ngModel)]="inf.name" />
+								</mat-form-field>
+								<mat-form-field>
+									<mat-label><abbr title="Maximum Transmission Unit">MTU</abbr></mat-label>
+									<input matInput id="{{inf.name}}-mtu" name="{{inf.name}}-mtu" type="number" min="1500" max="9000" step="7500" [(ngModel)]="inf.mtu"/>
+								</mat-form-field>
+								<mat-form-field>
+									<mat-label>Maximum Bandwidth</mat-label>
+									<input matInput id="{{inf.name}}-max-bandwidth" [(ngModel)]="inf.maxBandwidth" min="0" type="number" name="{{inf.name}}-max-bandwidth"/>
+									<mat-hint class="input-warning" *ngIf="inf.maxBandwidth !== 0">Cache servers will be unavailable</mat-hint>
+								</mat-form-field>
+								<mat-checkbox [labelPosition]="'before'" id="{{inf.name}}-monitor" name="{{inf.name}}-monitor" [(ngModel)]="inf.monitor">Monitor this interface</mat-checkbox>
+							</div>
+							<div class="expansion-container">
+								<mat-expansion-panel [expanded]="true">
+									<mat-expansion-panel-header>
+										<mat-panel-title>
+											IP Addresses
+										</mat-panel-title>
+										<mat-panel-description class="expansion-description">
+											<button class="panel-button" color="primary" mat-icon-button type="button" (click)="addIP($event, inf)">
+												<mat-icon>add</mat-icon>
+											</button>
+										</mat-panel-description>
+									</mat-expansion-panel-header>
+									<div class="expansion-ip-content" *ngFor="let ip of inf.ipAddresses; index as ipInd">
+										<mat-checkbox [labelPosition]="'before'" name="{{inf.name}}-{{ip.address}}-serviceAddress" id="{{inf.name}}-{{ip.address}}-serviceAddress" class="service-addr-cb" [(ngModel)]="ip.serviceAddress">Is a Service Address</mat-checkbox>
+										<mat-form-field>
+											<mat-label>Address</mat-label>
+											<input matInput id="{{inf.name}}-{{ip.address}}" name="{{inf.name}}-{{ip.address}}" class="ip-input" [(ngModel)]="ip.address" [pattern]="validIPPattern" required placeholder="192.0.2.0/27" />
+										</mat-form-field>
+										<mat-form-field>
+											<mat-label>Gateway</mat-label>
+											<input matInput id="{{inf.name}}-{{ip.address}}-gateway" name="{{inf.name}}-{{ip.address}}-gateway" [(ngModel)]="ip.gateway" [pattern]="validGatewayPattern"/>
+										</mat-form-field>
+										<button mat-icon-button type="button" color="warn" title="delete this IP address" class="remove-button" (click)="deleteIP($event, inf, ipInd)"><mat-icon>delete</mat-icon></button>
+									</div>
+								</mat-expansion-panel>
+							</div>
+						</mat-expansion-panel>
+					</mat-accordion>
+				</div>
+			</mat-expansion-panel>
+			<mat-expansion-panel [expanded]="true">
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						<p><abbr title="Integrated Lights-Out Management">ILO</abbr> Details</p>
+					</mat-panel-title>
+				</mat-expansion-panel-header>
+				<div class="expansion-content">
+					<mat-form-field>
+						<mat-label>IP Address</mat-label>
+						<input matInput name="iloIP" [(ngModel)]="server.iloIpAddress"/>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>Gateway IP Address</mat-label>
+						<input matInput name="iloGateway" [(ngModel)]="server.iloIpGateway"/>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>IP Netmask</mat-label>
+						<input matInput name="iloNetmask" [(ngModel)]="server.iloIpNetmask"/>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>Username</mat-label>
+						<input matInput name="iloUsername" [(ngModel)]="server.iloUsername"/>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>Password</mat-label>
+						<tp-obscured-text-input name="iloPassword" [autocomplete]="autocompleteNew" [(value)]="server.iloPassword"></tp-obscured-text-input>
+					</mat-form-field>
+				</div>
+			</mat-expansion-panel>
+			<mat-expansion-panel [expanded]="true">
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						<p>Management Interface Details</p>
+					</mat-panel-title>
+				</mat-expansion-panel-header>
+				<div class="expansion-content">
+					<mat-form-field>
+						<mat-label>IP Address</mat-label>
+						<input matInput name="mgmtIP" [(ngModel)]="server.mgmtIpAddress"/>
+						<mat-icon matSuffix [matTooltipClass]="'multi-line-tooltip'" [matTooltip]="'The IP Address for the server\'s management interface\n\nDeprecated:\nThis field has been deprecated and will be removed in a future version of Traffic Control'">help_outline</mat-icon>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>Gateway IP Address</mat-label>
+						<input matInput name="mgmtIpGateway" [(ngModel)]="server.mgmtIpGateway"/>
+						<mat-icon matSuffix [matTooltipClass]="'multi-line-tooltip'" [matTooltip]="'The IPv4 Gateway for the server\'s management interface\n\nDeprecated:\nThis field has been deprecated and will be removed in a future version of Traffic Control'">help_outline</mat-icon>
+					</mat-form-field>
+					<mat-form-field>
+						<mat-label>IP Netmask</mat-label>
+						<input matInput name="mgmtIpNetmask" [(ngModel)]="server.mgmtIpNetmask"/>
+						<mat-icon matSuffix [matTooltipClass]="'multi-line-tooltip'" [matTooltip]="'The IPv4 Netmask for the server\'s management interface\n\nDeprecated:\nThis field has been deprecated and will be removed in a future version of Traffic Control'">help_outline</mat-icon>
+					</mat-form-field>
+				</div>
+			</mat-expansion-panel>
+		</mat-card-content>
+		<mat-card-actions align="end">
+			<button mat-raised-button type="button" aria-label="Delete Server" *ngIf="!isNew" color="warn" (click)="delete()">Delete</button>
+			<button mat-raised-button type="submit" aria-label="Submit Server" color="primary">Submit</button>
+		</mat-card-actions>
+	</form>
+</mat-card>

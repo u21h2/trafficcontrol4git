@@ -1,0 +1,253 @@
+/*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+@use '@angular/material' as mat;
+
+/* You can add global styles to this file, and also import other style files */
+@import './theme.scss';
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.all-component-typographies();
+@include mat.core();
+
+// Define the default theme
+$traffic-portal-primary: mat.define-palette(mat.$blue-palette, 800);
+$traffic-portal-accent: mat.define-palette(mat.$pink-palette, 700, 600, 800);
+$traffic-portal-warn: mat.define-palette(mat.$orange-palette, 500);
+$traffic-portal-success: mat.define-palette(mat.$teal-palette, 300);
+$traffic-portal-error: mat.define-palette(mat.$deep-orange-palette, 600);
+$traffic-portal-theme: mat.define-light-theme((
+	color: (
+		primary: $traffic-portal-primary,
+		accent: $traffic-portal-accent,
+		warn: $traffic-portal-warn,
+	)
+));
+
+$traffic-portal-theme: set-ag-grid($traffic-portal-theme, (
+	odd-row-background-color: map-get(mat.$gray-palette, 100),
+	row-border-color: #e2e2e2,
+	border-color: #e2e2e2
+));
+$traffic-portal-theme: add-extra-colors($traffic-portal-theme, (
+	success: $traffic-portal-success,
+	error: $traffic-portal-error,
+));
+
+@include mat.all-component-themes($traffic-portal-theme);
+@include theme($traffic-portal-theme);
+
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 300;
+	font-display: swap;
+	src: url(./assets/Roboto.300.ttf) format('truetype');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url(./assets/Roboto.400.ttf) format('truetype');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url(./assets/Roboto.500.ttf) format('truetype');
+}
+
+@font-face {
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url(./assets/MaterialIcons.ttf) format('truetype');
+}
+
+.material-icons {
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 24px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+}
+
+body {
+	margin: 0;
+	overflow-x: hidden;
+}
+
+:root {
+	--toolbar-height: 3em;
+	--toolbar-padding: 5px;
+	--sidebar-max-width: 25vw;
+	--sidebar-min-width: 10em;
+	--content-padding: 8vw;
+}
+
+.multi-line-tooltip {
+	white-space: pre-line;
+}
+
+.mat-mdc-hint > a {
+	text-decoration: none;
+}
+
+.page-content {
+	min-width: 640px;
+	width: calc(100% - var(--content-padding));
+	max-width: 1440px;
+	margin: 1em auto;
+
+	& > div.search-container {
+		width: 50%;
+		margin: auto;
+		padding-right: 10px;
+		position: sticky;
+		top: 0;
+		z-index: 2;
+
+		input[type="search"] {
+			width: 100%;
+			margin: 0 0 15px;
+		}
+
+		@media(max-width: 1230px) {
+			& {
+				width: 75%;
+			}
+		}
+
+	}
+
+	.headers-container {
+		display: flex;
+		justify-content: end;
+	}
+
+	.actions-container, .headers-container {
+		.mdc-button {
+			margin: 0 8px;
+		}
+	}
+}
+
+.single-column, .double-column-responsive, .triple-column-responsive {
+	.container {
+		display: grid;
+		width: calc(100% - var(--content-padding) / 2);
+		margin: 1em auto 2em;
+		grid-column-gap: 15px;
+		grid-row-gap: 1em;
+	}
+}
+
+.single-column {
+	.container {
+		grid-template-columns: 1fr;
+	}
+}
+
+.double-column-responsive {
+	.container {
+		grid-template-columns: 1fr 1fr;
+
+		@media(max-width: 840px) {
+			& {
+				grid-template-columns: 1fr;
+			}
+		}
+	}
+}
+
+.triple-column-responsive {
+	.container {
+		grid-template-columns: 1fr 1fr 1fr;
+
+		@media(max-width: 1230px) {
+			& {
+				grid-template-columns: 1fr 1fr;
+			}
+		}
+
+		@media(max-width: 840px) {
+			& {
+				grid-template-columns: 1fr;
+			}
+		}
+	}
+}
+
+.mat-button-base {
+	// cursor: pointer;
+	text-transform: uppercase;
+}
+
+/* read-only pseudo-class always applies to checkbox inputs, because read-write never applies. Go figure. */
+optgroup:disabled option:disabled, button:disabled, input:read-only:not([type="checkbox"]), select:disabled, textarea:read-only, input[type="checkbox"][readonly] {
+	cursor: not-allowed;
+}
+
+h1, h2, h3, h4, h5, h6, label, legend {
+	font-family: 'Ubuntu', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+
+.ag-header-cell-menu-button {
+	cursor: pointer;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+button {
+	cursor: pointer;
+	text-transform: uppercase;
+}
+
+.page-fab, .page-fab.mat-mdc-fab {
+	position: fixed;
+	bottom: 16px;
+	right: 16px;
+}
+
+abbr[title] {
+	cursor: help;
+}
+
+form mat-hint.mat-mdc-form-field-hint.input-warning {
+	color: #ff9800;
+	font-weight: bold;
+	font-size: x-small;
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "cacheGroup": "foo",
+    "cacheGroupID": 0,
+    "cdn": "fake",
+    "cdnID": 1,
+    "configUpdateFailed": false,
+    "domainName": "traffic-monitor-integration.test",
+    "guid": "foo",
+    "hostName": "trafficmonitor",
+    "id": 1,
+    "interfaces": [
+      {
+        "ipAddresses": [
+          {
+            "address": "4.0.16.239.6",
+            "gateway": "4.0.16.239.1",
+            "serviceAddress": true
+          },
+          {
+            "address": "fc01:9400:1000:8::6",
+            "gateway": "fc01:9400:1000:8::1",
+            "serviceAddress": true
+          }
+        ],
+        "maxBandwidth": null,
+        "monitor": true,
+        "mtu": 1500,
+        "name": "eth0",
+        "routerHostName": "",
+        "routerPortName": ""
+      }
+    ],
+    "lastUpdated": "2023-08-28T19:55:05.265232Z",
+    "offlineReason": "none",
+    "physicalLocation": "",
+    "physicalLocationID": 0,
+    "rack": "",
+    "revalUpdateFailed": false,
+    "status": "REPORTED",
+    "statusID": 0,
+    "tcpPort": 80,
+    "type": "RASCAL",
+    "typeID": 0,
+    "xmppId": "",
+    "xmppPasswd": ""
+  }
+]

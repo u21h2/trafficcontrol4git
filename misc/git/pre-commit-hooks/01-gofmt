@@ -1,0 +1,24 @@
+#!/bin/sh
+# Copyright 2012 The Go Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+# SPDX-License-Identifier: BSD-3-Clause
+
+# git gofmt pre-commit hook
+#
+# To use, store as .git/hooks/pre-commit inside your repository and make sure
+# it has execute permissions.
+#
+# This script does not handle file names that contain spaces.
+
+unformatted_files_count="$(git ls-files '**.go' | grep -ve^vendor | xargs gofmt -l | wc -l)"
+if [[ "$unformatted_files_count" == 0 ]]; then
+	exit 0
+fi
+
+<<GOFMT_MESSAGE cat >&2
+${unformatted_files} go files must be formatted with \`go fmt\`. Please run:
+	go fmt ./...
+GOFMT_MESSAGE
+
+exit 1

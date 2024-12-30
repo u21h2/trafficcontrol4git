@@ -1,0 +1,141 @@
+{
+  "cacheGroups": [
+    {
+      "coordinates": {
+        "latitude": 0,
+        "longitude": 0
+      },
+      "name": "cg0"
+    }
+  ],
+  "config": {
+    "address": "172.22.0.2",
+    "gateway": "172.22.0.1",
+    "health.polling.interval": 2000,
+    "heartbeat.polling.interval": 2000,
+    "peers.polling.interval": 30,
+    "tm.polling.interval": 30
+  },
+  "deliveryServices": [
+    {
+      "TotalKbpsThreshold": 1000000,
+      "TotalTpsThreshold": 1000000,
+      "status": "REPORTED",
+      "topology": "",
+      "type": "HTTP",
+      "xmlId": "ds0"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Edge0",
+      "parameters": {
+        "MinFreeKbps": 0,
+        "health.connection.timeout": 10,
+        "health.polling.format": "",
+        "health.polling.type": "",
+        "health.polling.url": "http://${hostname}/_astats?application=&inf.name=bond0",
+        "health_threshold": {
+          "kbps": {
+            "Comparator": "<",
+            "Val": 20000
+          }
+        },
+        "history.count": 0
+      },
+      "type": "EDGE"
+    },
+    {
+      "name": "Monitor0",
+      "parameters": {
+        "MinFreeKbps": 0,
+        "health.connection.timeout": 10,
+        "health.polling.format": "",
+        "health.polling.type": "",
+        "health.polling.url": "",
+        "health_threshold": {
+          "kbps": {
+            "Comparator": "<",
+            "Val": 20000
+          }
+        },
+        "history.count": 0
+      },
+      "type": "RASCAL"
+    }
+  ],
+  "trafficMonitors": [
+    {
+      "cachegroup": "cg0",
+      "fqdn": "trafficmonitor.traffic-monitor-integration.test",
+      "hostName": "trafficmonitor",
+      "ip": "trafficmonitor",
+      "ip6": "",
+      "port": 80,
+      "profile": "Monitor0",
+      "status": "REPORTED"
+    }
+  ],
+  "trafficServers": [
+    {
+      "cachegroup": "cg0",
+      "deliveryServices": [
+        {
+          "xmlId": "ds0"
+        }
+      ],
+      "fqdn": "server0.monitor-integration.test",
+      "hashId": "server0",
+      "hostName": "server0",
+      "interfaces": [
+        {
+          "ipAddresses": [
+            {
+              "address": "172.22.0.2",
+              "gateway": "172.22.0.1",
+              "serviceAddress": true
+            }
+          ],
+          "maxBandwidth": 10000000,
+          "monitor": true,
+          "mtu": 1500,
+          "name": "bond0"
+        }
+      ],
+      "port": 30000,
+      "profile": "Edge0",
+      "status": "REPORTED",
+      "type": "EDGE"
+    },
+    {
+      "cachegroup": "cg0",
+      "deliveryServices": [
+        {
+          "xmlId": "ds0"
+        }
+      ],
+      "fqdn": "server1.monitor-integration.test",
+      "hashId": "server1",
+      "hostName": "server1",
+      "interfaces": [
+        {
+          "ipAddresses": [
+            {
+              "address": "172.22.0.2",
+              "gateway": "172.22.0.1",
+              "serviceAddress": true
+            }
+          ],
+          "maxBandwidth": 10000000,
+          "monitor": true,
+          "mtu": 1500,
+          "name": "bond0"
+        }
+      ],
+      "port": 30001,
+      "profile": "Edge0",
+      "status": "REPORTED",
+      "type": "EDGE"
+    }
+  ]
+}

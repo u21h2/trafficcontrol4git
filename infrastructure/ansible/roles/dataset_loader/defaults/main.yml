@@ -1,0 +1,2118 @@
+---
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+load_dataset: false
+# Url to use when contacting TrafficOps
+dl_to_url: https://to.kabletown.invalid
+# Url to use when contacting the timeseries visualizations from the TP UI
+dl_ts_url: https://stats.kabletown.invalid
+# URL to use for static CDN config files
+dl_sf_url: https://czf.kabletown.invalid
+# Credentials to use when logging into TrafficOps
+dl_to_user:
+dl_to_user_password:
+# TrafficOps API version to use
+dl_to_api_version: 3.0
+dl_target_api_url: "{{ dl_to_url }}/api/{{ dl_to_api_version }}"
+# URL for the CZF file
+dl_shallow_czf_url: "{{ dl_sf_url }}/czf.json"
+# URL for the the Anonymous IP configuration file
+dl_anonymous_ip_url: "{{ dl_sf_url }}/anonymousip.json"
+# URL for the MaxMind Geolocation database
+dl_geolocation_url: "{{ dl_sf_url }}/MaxMind/auto/GeoIP2-CityLite.mmdb.gz"
+# URL for the MaxMind Anonymous IP database
+dl_anonymous_db_url: "{{ dl_sf_url }}/MaxMind/auto/GeoIP2-Anonymous-IP.mmdb.gz"
+# Which IP Addresses are allowed to communicate with the astats endpoints on each cache
+dl_allow_ip4: "127.0.0.1"
+dl_allow_ip6: "::1"
+# Which version of Apache Traffic Server to deploy
+dl_ats_version: "7.1.4-2.el7"
+dl_mojo_token:
+# Information regarding how large the ATS ram cache ought to be on an edge tier cache
+dl_atsec_ram_cache_size_percentage: 18
+# Largest object size to be held in the ram cache before going straght to block devices on an edge tier cache
+dl_atsec_ram_cache_max_obj_size_mb: 1073.741824 # 1 GiB
+# Information regarding how large the ATS ram cache ought to be on an mid tier cache
+dl_atsmid_ram_cache_size_percentage: "{{ dl_atsec_ram_cache_size_percentage }}"
+# Largest object size to be held in the ram cache before going straght to block devices on a mid tier cache
+dl_atsmid_ram_cache_max_obj_size_mb: "{{ dl_atsec_ram_cache_max_obj_size_mb }}"
+# Information regarding how large the Grove ram cache ought to be
+dl_grove_ram_cache_size_percentage: 50
+# What block device prefixes should be examined for partitions and maybe used as cache disks as reported by ansible_facts.devices
+dl_ds_merged_cache_block_device_prefix_whitelist: "{{ dl_ds_default_cache_block_device_prefix_whitelist }}"
+dl_ds_default_cache_block_device_prefix_whitelist:
+  - vd
+  - hd
+  - sd
+  - nvme
+# What block device prefixes should be examinded for ram disks to use with caches
+dl_ds_merged_cache_ram_device_prefix_whitelist: "{{ dl_ds_default_cache_ram_device_prefix_whitelist }}"
+dl_ds_default_cache_ram_device_prefix_whitelist:
+  - ram
+# What percentage of available interface speed should be available to caches before becoming unhealthy
+dl_ds_reserved_bandwidth_percentage: 90
+
+# Handle to provide your own custom hardware information
+# Defining this variable disables automatic detection
+#dl_ds_cache_hardware_info:
+#  cdn-atsec-01.kabletown.invalid:
+#    cache_disks:
+#      - vdb
+#    ram_cache_size: 5762160000
+#    ram_disks:
+#      - ram0
+#      - ram1
+#      - ram2
+
+# Hardcoded names of groups in the tasks are a bad idea, but this allows people to change them as needed to match their inventory
+dl_hosts_fakeorigin: "{{ groups['fakeorigin'] | default([],true) }}"
+dl_hosts_tm: "{{ groups['traffic_monitor'] | default([],true) }}"
+dl_hosts_tr: "{{ groups['traffic_router'] | default([],true) }}"
+dl_hosts_to: "{{ groups['traffic_ops'] | default([],true) }}"
+dl_hosts_mso_alias: "{{ groups['mso_parent_alias'] | default([],true) }}"
+dl_hosts_atsmid: "{{ groups['atsmid'] | default([],true) }}"
+dl_hosts_atsec: "{{ groups['atsec'] | default([],true) }}"
+dl_hosts_grove: "{{ groups['grove'] | default([],true) }}"
+dl_hosts_all: "{{ groups['all'] | default([],true) }}"
+
+# TO CDN
+dl_ds_merged_cdns: "{{ dl_ds_default_cdns }}"
+dl_ds_default_cdns:
+  mkga:
+    name: Kabletown2.0
+    dnssecEnabled: false
+
+# TO Types
+dl_ds_merged_types: "{{ dl_ds_default_types }}"
+dl_ds_default_types: []
+
+# The mapping of components from inventory hostvars to TO types
+dl_ds_merged_type_ansible_component_map: "{{ dl_ds_default_type_ansible_component_map }}"
+dl_ds_default_type_ansible_component_map:
+  grove: EDGE
+  atsec: EDGE
+  atsmid: MID
+  fakeorigin: ORG
+  mso_parent_alias: ORG
+  influxdb: INFLUXDB
+  riak: RIAK
+  traffic_monitor: RASCAL
+  traffic_ops: TRAFFIC_OPS
+  traffic_opsdb: TRAFFIC_OPS_DB
+  traffic_portal: TRAFFIC_PORTAL
+  traffic_router: CCR
+  traffic_stats: TRAFFIC_STATS
+
+# TO Users
+dl_ds_merged_users: "{{ dl_ds_default_users }}"
+dl_ds_default_users:
+  - username: userA
+    #password: # Randomly generated
+    email: userA+userA@kabletown.invalid
+    fullName: A local account with Oper rights
+    role: operations
+  - username: userB
+    #password: # Randomly generated
+    email: userB+userA@kabletown.invalid
+    fullName: A local account with RO rights
+    role: read-only
+  - username: '{{ dl_ds_default_federation_user }}'
+    email: '{{ dl_ds_default_federation_user }}@kabletown.invalid'
+    fullName: A dedicated user to assign existing Resolvers to and remove existing Resolvers from Federations
+    role: operations # TODO: Reduce role to federations level once a federations role (privilege level 15) exists
+
+# TO Cachegroups
+dl_ds_merged_cachegroups: "{{ dl_ds_default_cachegroups }}"
+dl_ds_default_cachegroups:
+  - name: infrastructure
+    shortName: infra
+    latitude: 0
+    longitude: 0
+    parentCachegroup:
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: TC_LOC
+    fallbackToClosest:
+  - name: multi-site-org-east
+    shortName: msoe
+    latitude: 0
+    longitude: 0
+    parentCachegroup:
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: ORG_LOC
+    fallbackToClosest:
+  - name: multi-site-org-west
+    shortName: msow
+    latitude: 0
+    longitude: 0
+    parentCachegroup:
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: ORG_LOC
+    fallbackToClosest:
+  - name: mid-west
+    shortName: west
+    latitude: 0
+    longitude: 0
+    parentCachegroup: multi-site-org-west
+    secondaryParentCachegroup: multi-site-org-east
+    localizationMethods:
+    type: MID_LOC
+    fallbackToClosest:
+  - name: mid-east
+    shortName: east
+    latitude: 0
+    longitude: 0
+    parentCachegroup: multi-site-org-east
+    secondaryParentCachegroup: multi-site-org-west
+    localizationMethods:
+    type: MID_LOC
+    fallbackToClosest:
+  - name: sacramento-ca-usa
+    shortName: sea
+    latitude: 38.555605
+    longitude: -121.468926
+    parentCachegroup: mid-west
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: EDGE_LOC
+    fallbackToClosest:
+  - name: albany-ny-usa
+    shortName: ny
+    latitude: 42.659829
+    longitude: -73.781339
+    parentCachegroup: mid-east
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: EDGE_LOC
+    fallbackToClosest:
+  - name: tallahassee-fl-usa
+    shortName: jac
+    latitude: 30.4518
+    longitude: -84.27277
+    parentCachegroup: mid-east
+    secondaryParentCachegroup: mid-west
+    localizationMethods:
+    type: EDGE_LOC
+    fallbackToClosest:
+  - name: tr-east
+    shortName: tr-east
+    latitude: 42.659829
+    longitude: -73.781339
+    parentCachegroup:
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: TR_LOC
+    fallbackToClosest:
+  - name: tr-west
+    shortName: tr-west
+    latitude: 38.555605
+    longitude: -121.468926
+    parentCachegroup:
+    secondaryParentCachegroup:
+    localizationMethods:
+    type: TR_LOC
+    fallbackToClosest:
+
+# TO Divisions, Regions, Physical Locations, and how those map to cachegroups
+dl_ds_merged_divisions: "{{ dl_ds_default_divisions }}"
+dl_ds_default_divisions:
+  - division_name: Eastern
+    regions:
+      - region_name: NorthEastern
+        phys_locations:
+          - name: NY-Albany
+            shortname: albany
+            address: 123 Corporate Drive
+            city: Albany
+            state: NY
+            zip: 12084
+            phone: 555-555-5555
+            poc: headend-distro-albany@kabletown.invalid
+            email: headend-distro-albany@kabletown.invalid
+            comments: Mail parts to 234 Corporate Drive, Albany, NY 12084 instead
+            cachegroups:
+              - albany-ny-usa
+              - mid-east
+              - tr-east
+              - multi-site-org-east
+              - infrastructure
+          - name: Augusta-ME
+            shortname: augusta
+            address: 252 Main St
+            city: Augusta
+            state: ME
+            zip: 04330
+            phone:
+            poc: Randy Joe
+            email:
+            comments: Server actually housed at 35 Main St, Augusta, ME 04330 instead
+            cachegroups:
+              - albany-ny-usa
+      - region_name: SouthEastern
+        phys_locations:
+          - name: Tallahassee-FL
+            shortname: tallahassee
+            address: 78 Executive Court N Suite 10
+            city: Tallahassee
+            state: FL
+            zip: 32216
+            phone: Ask Randy Joe
+            poc: Headend Service Desk
+            email: Ask Randy Joe
+            comments: Call to get tracking ticket number before mailing parts
+            cachegroups:
+              - tallahassee-fl-usa
+  - division_name: Western
+    regions:
+      - region_name: NorthWestern
+        phys_locations:
+          - name: Sacramento-CA
+            shortname: sacramento
+            address: 9043 Roosevelt Blvd S
+            city: Sacramento
+            state: CA
+            zip: 94203
+            phone: 1231231234
+            poc: Cindy Popadopolis
+            email: _cindy_popadopolis_@kabletown.invalid
+            comments: If cindy does not respond, try Ben Jones at 555-5555
+            cachegroups:
+              - sacramento-ca-usa
+              - mid-west
+              - tr-west
+              - multi-site-org-west
+
+# Mapping of eligible TO Profile regex to inventory hostvar component name
+dl_ds_merged_profile_prefix_ansible_component_map: "{{ dl_ds_default_profile_prefix_ansible_component_map }}"
+dl_ds_default_profile_prefix_ansible_component_map:
+  grove: '(?i)^EDGE_GROVE_.*'
+  atsec: "(?i)^EDGE_ATS_{{ dl_ds_ats_major_version }}_.*"
+  atsmid: "(?i)^MID_ATS_{{ dl_ds_ats_major_version }}_.*"
+  fakeorigin: '(?i)^MSO_.*'
+  mso_parent_alias: '(?i)^MSO_.*'
+  influxdb: '(?i)^INFLUXDB$'
+  riak: '(?i)^RIAK.*'
+  traffic_monitor: '(?i)^RASCAL_.*'
+  traffic_ops: '(?i)^TRAFFIC_OPS$'
+  traffic_opsdb: '(?i)^TRAFFIC_OPS_DB$'
+  traffic_portal: '(?i)^TRAFFIC_PORTAL$'
+  traffic_router: '(?i)^CCR_.*'
+  traffic_stats: '(?i)^TRAFFIC_STATS$'
+
+# TO Servers
+dl_ds_merged_servers: "{{ dl_ds_default_servers }}"
+dl_ds_default_servers:
+  server.kabletown.invalid:
+    tcpPort: 80
+    httpsPort: 443
+    rack: M1
+    routerHostName: 1hop.router.kabletown.invalid
+    routerPortName: 1/1/1/1
+  riak.kabletown.invalid:
+    tcpPort: 8087 # Note: this is actually wired in via TO cdn.conf if it ever needs to be different, it's adjusted here for human clarity.  It's also the Riak protobuf port, not http rest port which is defaulted to 8098 and probably disabled.
+    httpsPort: 8088 # Note: this isn't actually used anywhere, it's just for human clarity.  This is the default for the rest https interface for things like SOLR or curl.
+    rack: M2
+    routerHostName: 2hop.router.kabletown.invalid
+    routerPortName: 2/1/1/1
+  influxdb.kabletown.invalid:
+    tcpPort: 8086 # Note: This is used by TO as a fallback on https or http
+    httpsPort: 8086 # Note: This is used by TO for https connections
+    rack: M3
+    routerHostName: 3hop.router.kabletown.invalid
+    routerPortName: 3/1/1/1
+  traffic_monitor.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by traffic_stats and traffic router
+    httpsPort: 443 # Note: This may be used by traffic_stats and traffic router
+    rack: M4
+    routerHostName: 4hop.router.kabletown.invalid
+    routerPortName: 4/1/1/1
+  atsec.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by traffic_monitor for astats
+    httpsPort: 443 # Note: This may be used by traffic_monitor for astats
+    rack: M4
+    routerHostName: 4hop.router.kabletown.invalid
+    routerPortName: 4/1/1/1
+  atsmid.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by traffic_monitor for astats
+    httpsPort: 443 # Note: This may be used by traffic_monitor for astats
+    rack: M5
+    routerHostName: 5hop.router.kabletown.invalid
+    routerPortName: 5/1/1/1
+  grove.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by traffic_monitor for astats
+    httpsPort: 443 # Note: This may be used by traffic_monitor for astats
+    rack: M6
+    routerHostName: 6hop.router.kabletown.invalid
+    routerPortName: 6/1/1/1
+  fakeorigin.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by TO ATS Config generation for Multi-site origins
+    rack: M6
+    routerHostName: 6hop.router.kabletown.invalid
+    routerPortName: 6/1/1/1
+  mso_parent_alias.kabletown.invalid:
+    tcpPort: 80 # Note: This may be used by TO ATS Config generation for Multi-site origins
+    rack: M7
+    routerHostName: 7hop.router.kabletown.invalid
+    routerPortName: 7/1/1/1
+  traffic_opsdb.kabletown.invalid:
+    tcpPort: 5432 # Note: This is actually wired in via TO config files, but is here for human clarity
+    rack: M8
+    routerHostName: 8hop.router.kabletown.invalid
+    routerPortName: 8/1/1/1
+  traffic_ops.kabletown.invalid:
+    tcpPort: 80 # Note: This is actually wired in via TO config files, but is here for human clarity
+    httpsPort: 443 # Note: This is actually wired in via TO config files, but is here for human clarity
+    rack: M9
+    routerHostName: 9hop.router.kabletown.invalid
+    routerPortName: 9/1/1/1
+  traffic_portal.kabletown.invalid:
+    httpsPort: 443 # Note: This is actually wired in via TP config files, but is here for human clarity
+    rack: M10
+    routerHostName: 10hop.router.kabletown.invalid
+    routerPortName: 10/1/1/1
+  traffic_router.kabletown.invalid:
+    tcpPort: 80 # Note: This is actually wired in via TR server.xml config file, but is here for human clarity.  Note that default port 53 is also used for DNS.
+    httpsPort: 443 # Note: This is actually wired in via TR server.xml config file, but is here for human clarity.  Note that default port 53 is also used for DNS.
+    rack: M11
+    routerHostName: 11hop.router.kabletown.invalid
+    routerPortName: 11/1/1/1
+  influxrelay.kabletown.invalid:
+    tcpPort: 9086 # Note: This is actually wired in via influx-relay config files, but is here for human clarity
+    httpsPort: 9087 # Note: This is actually wired in via influx-relay config files, but is here for human clarity
+    rack: M12
+    routerHostName: 12hop.router.kabletown.invalid
+    routerPortName: 12/1/1/1
+
+# TO Profiles (non-template) and associated parameters
+dl_ds_merged_profiles: "{{ dl_ds_default_profiles }}"
+dl_ds_default_profiles:
+  - name: GLOBAL
+    description: GLOBAL profile
+    cdn: ALL
+    type: UNK_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: geolocation.polling.url
+        configFile: CRConfig.json
+        value: "{{ dl_sf_url }}/MaxMind/auto/GeoLiteCity.dat.gz"
+        secure: 0
+      - name: all_graph_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard/db/deliveryservice-stats"
+        secure: 0
+      - name: cachegroup_graph_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard/script/traffic_ops_cachegroup.js?which="
+        secure: 0
+      - name: daily_bw_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard-solo/db/daily-summary?panelId=1&from=1349071200795&to=now"
+        secure: 0
+      - name: daily_served_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard-solo/db/daily-summary?panelId=2&from=1349192564795&to=now"
+        secure: 0
+      - name: default_geo_miss_latitude
+        configFile: global
+        value: '39.28333'
+        secure: 0
+      - name: default_geo_miss_longitude
+        configFile: global
+        value: "-76.616667"
+        secure: 0
+      - name: deliveryservice_graph_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard/script/traffic_ops_deliveryservice.js?which="
+        secure: 0
+      - name: server_graph_url
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard/script/traffic_ops_server.js?which="
+        secure: 0
+      - name: tm.instance_name
+        configFile: global
+        value: Apache Traffic Control CDN
+        secure: 0
+      - name: tm.rev_proxy.url
+        configFile: global
+        value: "{{ dl_to_url }}:81"
+        secure: 0
+      - name: tm.toolname
+        configFile: global
+        value: Traffic Ops
+        secure: 0
+      - name: tm.traffic_mon_fwd_proxy
+        configFile: global
+        value: "{{ dl_to_url }}:81"
+        secure: 0
+      - name: tm.url
+        configFile: global
+        value: "{{ dl_to_url }}/"
+        secure: 0
+      - name: use_reval_pending
+        configFile: global
+        value: '1'
+        secure: 0
+      - name: visual_status_panel_1
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard-solo/db/cdn-stats-by-type?panelId=1"
+        secure: 0
+      - name: visual_status_panel_2
+        configFile: global
+        value: "{{ dl_ts_url }}/dashboard-solo/db/cdn-stats-by-type?panelId=2"
+        secure: 0
+      - name: maxRevalDurationDays
+        configFile: regex_revalidate.config
+        value: '90'
+        secure: 0
+  - name: TRAFFIC_OPS_SERVER
+    description: TRAFFIC_OPS server profile
+    cdn: ALL
+    type: UNK_PROFILE
+    routingDisabled: false
+    parameters:
+  - name: TRAFFIC_STATS
+    description: Traffic_Stats profile
+    cdn: ALL
+    type: TS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.node.cache.bytes_free
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.bytes_total
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.bytes_used
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.directory_collision
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.direntries.total
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.direntries.used
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.evacuate.active
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.evacuate.failure
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.evacuate.success
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.frags_per_doc.1
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.frags_per_doc.2
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.frags_per_doc.3+
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.gc_bytes_evacuated
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.gc_frags_evacuated
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.hdr_marshal_bytes
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.hdr_marshals
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.lookup.active
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.lookup.failure
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.lookup.success
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.ram_cache.bytes_used
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.ram_cache.hits
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.ram_cache.misses
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.ram_cache.total_bytes
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.volume_1.wrap_count
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.volume_1.write.failure
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.volume_1.write.success
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.cache.volume_2.wrap_count
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.http.background_fill_bytes_aborted_stat
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.http.background_fill_bytes_completed_stat
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.http.background_fill_current_count
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.http.current_client_connections
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.ssl.cipher.user_agent.DES-CBC3-SHA
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.ssl.cipher.user_agent.ECDHE-RSA-AES128-GCM-SHA256
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.ssl.cipher.user_agent.RC4-MD5
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: ats.proxy.process.ssl.cipher.user_agent.RC4-SHA
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: bandwidth
+        secure: 0
+      - name: CacheStats
+        configFile: traffic_stats.config
+        value: maxKbps
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: kbps
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: status_4xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: status_5xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: tps_2xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: tps_3xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: tps_4xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: tps_5xx
+        secure: 0
+      - name: DsStats
+        configFile: traffic_stats.config
+        value: tps_total
+        secure: 0
+
+dl_ds_ats_major_version: "{{ 9 if dl_ats_version is version('9','>=') else 8 if dl_ats_version is version('8', '>=') else 7 }}"
+
+# ATS Profiles are huge, we should normalize them a big to make them more understandable
+dl_ds_default_profile_layers:
+  ats:
+    edge:
+      common:
+        - name: location
+          configFile: bg_fetch.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: location
+          configFile: drop_qstring.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: algorithm
+          configFile: parent.config
+          value: consistent_hash
+        - name: qstring
+          configFile: parent.config
+          value: ignore
+        - name: CONFIG proxy.config.accept_threads
+          configFile: records.config
+          value: INT 5
+        - name: CONFIG proxy.config.cache.hostdb.sync_frequency
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.cache.ram_cache_cutoff
+          configFile: records.config
+          value: "INT {{ (dl_atsec_ram_cache_max_obj_size_mb | float * 1000000) | int }}"
+        - name: CONFIG proxy.config.cache.read_while_writer.max_retries
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.env_prep
+          configFile: records.config
+          value: STRING example_prep.sh
+        - name: CONFIG proxy.config.hostdb.serve_stale_for
+          configFile: records.config
+          value: INT 20
+        - name: CONFIG proxy.config.http.parent_proxy.connect_attempts_timeout
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.http.parent_proxy.per_parent_connect_attempts
+          configFile: records.config
+          value: INT 1
+        - name: CONFIG proxy.config.http.parent_proxy.total_connect_attempts
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.http.server_ports
+          configFile: records.config
+          value: STRING 80 80:ipv6 443:proto=http:ssl 443:ipv6:proto=http:ssl
+        - name: location
+          configFile: set_dscp_0.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_10.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_12.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_14.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_16.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_18.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_20.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_22.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_24.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_26.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_28.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_30.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_32.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_34.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_36.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_37.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_38.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_40.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_48.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_56.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: set_dscp_8.config
+          value: "/opt/trafficserver/etc/trafficserver/dscp"
+        - name: location
+          configFile: ssl_multicert.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: location
+          configFile: anymap_hdr_rw.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: data
+          configFile: anymap_hdr_rw.config
+          value: cond %{SEND_REQUEST_HDR_HOOK} __RETURN__ add-header FAKEORIGIN-ATS-ANYMAP-GLOBAL '%<cque>' __RETURN__ add-header FAKEORIGIN-ATS-ANYMAP-ORIGINAL-REQUESTOR '%<chi>' __RETURN__ cond %{SEND_RESPONSE_HDR_HOOK} __RETURN__ add-header ATS_ANYMAP_GLOBAL 'Anymap_Global_Match' [L]
+      v7:
+        - name: LogFormat.Format
+          configFile: logging.config
+          value: '%<cqtq> chi=%<chi> phn=%<phn> php=%<php> shn=%<shn> url=%<cquuc> cqhm=%<cqhm> cqhv=%<cqpv> pssc=%<pssc> ttms=%<ttms> b=%<pscl> sssc=%<sssc> sscl=%<sscl> cfsc=%<cfsc> pfsc=%<pfsc> crc=%<crc> phr=%<phr> pqsn=%<pqsn> uas=\"%<{User-Agent}cqh>\" xmt=\"%<{X-MoneyTrace}cqh>\" svc=%<{X-CDN-SVC}cqh>'
+        - name: remap_stats.so
+          configFile: plugin.config
+          value: ''
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections
+          configFile: records.config
+          value: INT 500
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.cache.http.compatibility.4-2-0-fixup
+          configFile: records.config
+          value: INT 0
+      v8:
+        - name: remap_stats.so -p
+          configFile: plugin.config
+          value: ''
+        # Default changed between ATS 7 & 8
+        - name: CONFIG proxy.config.ssl.server.multicert.exit_on_load_fail
+          configFile: records.config
+          value: INT 0
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections
+          configFile: records.config
+          value: INT 500
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.cache.http.compatibility.4-2-0-fixup
+          configFile: records.config
+          value: INT 0
+      v9:
+        # Param change for ATS 9, from proxy.config.http.origin_max_connections
+        - name: CONFIG proxy.config.http.per_server.connection.max
+          configFile: records.config
+          value: INT 500
+    mid:
+      common:
+        - name: weight
+          configFile: parent.config
+          value: '1.0'
+        - name: CONFIG proxy.config.accept_threads
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.cache.ram_cache_cutoff
+          configFile: records.config
+          value: "INT {{ (dl_atsmid_ram_cache_max_obj_size_mb | float * 1000000) | int }}"
+        - name: CONFIG proxy.config.hostdb.serve_stale_for
+          configFile: records.config
+          value: INT 12
+        - name: CONFIG proxy.config.hostdb.ttl_mode
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.http.parent_proxy.connect_attempts_timeout
+          configFile: records.config
+          value: INT 1
+        - name: CONFIG proxy.config.http.server_ports
+          configFile: records.config
+          value: STRING 80 80:ipv6
+        - name: CONFIG proxy.config.url_remap.remap_required
+          configFile: records.config
+          value: INT 0
+      v7:
+        - name: ramdisk_size
+          configFile: grub.conf
+          value: ramdisk_size=16777216
+        - name: LogFormat.Format
+          configFile: logging.config
+          value: '%<cqtq> chi=%<chi> phn=%<phn> php=%<php> shn=%<shn> url=%<cquuc> cqhm=%<cqhm> cqhv=%<cqpv> pssc=%<pssc> ttms=%<ttms> b=%<pscl> sssc=%<sssc> sscl=%<sscl> cfsc=%<cfsc> pfsc=%<pfsc> crc=%<crc> phr=%<phr> pqsn=%<shn> uas=\"%<{User-Agent}cqh>\" xmt=\"%<{X-MoneyTrace}cqh>\" svc=%<{X-CDN-SVC}cqh>'
+        - name: CONFIG proxy.config.cop.active_health_checks
+          configFile: records.config
+          value: INT 0
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections
+          configFile: records.config
+          value: INT 1500
+      v8:
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections
+          configFile: records.config
+          value: INT 1500
+      v9:
+        # Param change for ATS 9, from proxy.config.http.origin_max_connections
+        - name: CONFIG proxy.config.http.per_server.connection.max
+          configFile: records.config
+          value: INT 1500
+    common:
+      common:
+        - name: location
+          configFile: 12M_facts
+          value: "/opt/ort"
+        - name: location
+          configFile: 50-ats.rules
+          value: "/etc/udev/rules.d/"
+        - name: domain_name
+          configFile: CRConfig.json
+          value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        - name: weight
+          configFile: CRConfig.json
+          value: '1.0'
+        - name: allow_ip
+          configFile: astats.config
+          value: "{{ dl_allow_ip4 }}"
+        - name: allow_ip6
+          configFile: astats.config
+          value: "{{ dl_allow_ip6 }}"
+        - name: location
+          configFile: astats.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: path
+          configFile: astats.config
+          value: _astats
+        - name: record_types
+          configFile: astats.config
+          value: '122'
+        - name: location
+          configFile: cache.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: location
+          configFile: cacheurl_qstring.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: trafficserver
+          configFile: chkconfig
+          value: '0:off\t1:off\t2:on\t3:on\t4:on\t5:on\t6:off'
+        - name: location
+          configFile: hosting.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: coalesce_masklen_v4
+          configFile: ip_allow.config
+          value: '16'
+        - name: coalesce_masklen_v6
+          configFile: ip_allow.config
+          value: '40'
+        - name: coalesce_number_v4
+          configFile: ip_allow.config
+          value: '5'
+        - name: coalesce_number_v6
+          configFile: ip_allow.config
+          value: '5'
+        - name: location
+          configFile: ip_allow.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: purge_allow_ip
+          configFile: ip_allow.config
+          value: 127.0.0.1
+        - name: trafficserver
+          configFile: package
+          value: "{{ dl_ats_version }}"
+        - name: trafficserver-debuginfo
+          configFile: package
+          value: "{{ dl_ats_version }}"
+        - name: location
+          configFile: parent.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: astats_over_http.so
+          configFile: plugin.config
+          value: ''
+        - name: location
+          configFile: plugin.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: regex_revalidate.so
+          configFile: plugin.config
+          value: "--disable-timed-updates --config regex_revalidate.config"
+        - name: health.connection.timeout
+          configFile: rascal.properties
+          value: '2000'
+        - name: health.polling.url
+          configFile: rascal.properties
+          value: http://${hostname}/_astats?application=&inf.name=${interface_name}
+        - name: health.threshold.kbps
+          configFile: rascal.properties
+          value: "<{{ ((Target_hardware_profile.value.network_bandwidth_limit | default('1000') | float - (Target_hardware_profile.value.network_bandwidth_limit | default('1000') | float * ((100 - dl_ds_reserved_bandwidth_percentage | float) / 100))) | int) * 1000 }}"
+        - name: health.threshold.loadavg
+          configFile: rascal.properties
+          value: "{{ Target_hardware_profile.value.load_avg_limit | default('10') }}.0"
+        - name: health.threshold.queryTime
+          configFile: rascal.properties
+          value: '1500'
+        - name: history.count
+          configFile: rascal.properties
+          value: '30'
+        - name: CONFIG proxy.config.allocator.dontdump_iobuffers
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.allocator.thread_freelist_size
+          configFile: records.config
+          value: INT 1024
+        - name: CONFIG proxy.config.cache.enable_checksum
+          configFile: records.config
+          value: INT 1
+        - name: CONFIG proxy.config.cache.min_average_object_size
+          configFile: records.config
+          value: INT 131072
+        - name: CONFIG proxy.config.cache.ram_cache.size
+          configFile: records.config
+          value: "INT {{ cache_hardware_profile_index[Target_hardware_profile.value.ram_cache_size | default(0)] | default(20000) }}"
+        - name: CONFIG proxy.config.crash_log_helper
+          configFile: records.config
+          value: STRING /usr/local/bin/backtrace-invoker.sh
+        - name: CONFIG proxy.config.diags.logfile.rolling_enabled
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.diags.logfile.rolling_size_mb
+          configFile: records.config
+          value: INT 1024
+        - name: CONFIG proxy.config.diags.output.emergency
+          configFile: records.config
+          value: STRING SL
+        - name: CONFIG proxy.config.diags.show_location
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.dns.lookup_timeout
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.dns.round_robin_nameservers
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.exec_thread.autoconfig
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.exec_thread.autoconfig.scale
+          configFile: records.config
+          value: FLOAT 1.5
+        - name: CONFIG proxy.config.exec_thread.limit
+          configFile: records.config
+          value: INT 32
+        - name: CONFIG proxy.config.hostdb.lookup_timeout
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.hostdb.max_size
+          configFile: records.config
+          value: INT -1
+        - name: CONFIG proxy.config.hostdb.timeout
+          configFile: records.config
+          value: INT 1440
+        - name: CONFIG proxy.config.http.background_fill_completed_threshold
+          configFile: records.config
+          value: FLOAT 0.0
+        - name: CONFIG proxy.config.http.cache.guaranteed_max_lifetime
+          configFile: records.config
+          value: INT 2592000
+        - name: CONFIG proxy.config.http.cache.heuristic_lm_factor
+          configFile: records.config
+          value: FLOAT 0.10
+        - name: CONFIG proxy.config.http.cache.ignore_client_cc_max_age
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.http.cache.max_open_read_retries
+          configFile: records.config
+          value: INT 150
+        - name: CONFIG proxy.config.http.cache.max_open_write_retries
+          configFile: records.config
+          value: INT 150
+        - name: CONFIG proxy.config.http.cache.required_headers
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.http.connect_attempts_max_retries
+          configFile: records.config
+          value: INT 6
+        - name: CONFIG proxy.config.http.connect_attempts_rr_retries
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.http.connect_attempts_timeout
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.http.down_server.cache_time
+          configFile: records.config
+          value: INT 5
+        - name: CONFIG proxy.config.http.insert_response_via_str
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.http.keep_alive_no_activity_timeout_in
+          configFile: records.config
+          value: INT 115
+        - name: CONFIG proxy.config.http.negative_caching_enabled
+          configFile: records.config
+          value: INT 1
+        - name: CONFIG proxy.config.http.negative_caching_lifetime
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.http.negative_caching_list
+          configFile: records.config
+          value: STRING 204 305 403 404 405 414 500 501 502 503 504
+        - name: CONFIG proxy.config.http.parent_proxy.retry_time
+          configFile: records.config
+          value: INT 10
+        - name: CONFIG proxy.config.http.referer_default_redirect
+          configFile: records.config
+          value: STRING http://www.kabletown.invalid/
+        - name: CONFIG proxy.config.http.request_header_max_size
+          configFile: records.config
+          value: INT 32000
+        - name: CONFIG proxy.config.http.transaction_no_activity_timeout_in
+          configFile: records.config
+          value: INT 5
+        - name: CONFIG proxy.config.http.transaction_no_activity_timeout_out
+          configFile: records.config
+          value: INT 5
+        - name: CONFIG proxy.config.log.rolling_enabled
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.log.rolling_size_mb
+          configFile: records.config
+          value: INT 1024
+        - name: CONFIG proxy.config.mlock_enabled
+          configFile: records.config
+          value: INT 2
+        - name: CONFIG proxy.config.net.connections_throttle
+          configFile: records.config
+          value: INT 350000
+        - name: CONFIG proxy.config.net.default_inactivity_timeout
+          configFile: records.config
+          value: INT 180
+        - name: CONFIG proxy.config.net.max_connections_in
+          configFile: records.config
+          value: INT 100000
+        - name: CONFIG proxy.config.net.sock_option_flag_in
+          configFile: records.config
+          value: INT 13
+        - name: CONFIG proxy.config.net.sock_option_flag_out
+          configFile: records.config
+          value: INT 9
+        - name: CONFIG proxy.config.net.sock_send_buffer_size_in
+          configFile: records.config
+          value: INT 262144
+        - name: CONFIG proxy.config.product_company
+          configFile: records.config
+          value: STRING Apache
+        - name: CONFIG proxy.config.product_name
+          configFile: records.config
+          value: STRING Traffic
+        - name: CONFIG proxy.config.proxy_name
+          configFile: records.config
+          value: STRING __HOSTNAME__
+        - name: CONFIG proxy.config.ssl.CA.cert.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.ssl.client.CA.cert.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.ssl.client.cert.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.ssl.client.private_key.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.ssl.ocsp.enabled
+          configFile: records.config
+          value: INT 1
+        - name: CONFIG proxy.config.ssl.server.cert.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.ssl.server.cipher_suite
+          configFile: records.config
+          value: STRING ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:AES128-GCM-SHA256:AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!RC4:!SRP:!DSS:!PSK:!aNULL:!eNULL:!SSLv2:@STRENGTH
+        - name: CONFIG proxy.config.ssl.server.private_key.path
+          configFile: records.config
+          value: STRING etc/trafficserver/ssl
+        - name: CONFIG proxy.config.system.file_max_pct
+          configFile: records.config
+          value: FLOAT 0.9
+        - name: location
+          configFile: records.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: location
+          configFile: regex_revalidate.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: location
+          configFile: remap.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: Disk_Volume
+          configFile: storage.config
+          value: '1'
+        - name: Drive_Letters
+          configFile: storage.config
+          value: "{{ Target_hardware_profile_cache_disk_letters | default('') }}"
+        - name: Drive_Prefix
+          configFile: storage.config
+          value: "/dev/{{ Target_hardware_profile_cache_disk_prefix | default('sd') }}"
+        - name: RAM_Drive_Letters
+          configFile: storage.config
+          value: "{{ Target_hardware_profile_ram_disk_letters | default('') }}"
+        - name: RAM_Drive_Prefix
+          configFile: storage.config
+          value: "/dev/{{ Target_hardware_profile_ram_disk_prefix | default('ram') }}"
+        - name: RAM_Volume
+          configFile: storage.config
+          value: '2'
+        - name: location
+          configFile: storage.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+        - name: location
+          configFile: volume.config
+          value: "/opt/trafficserver/etc/trafficserver/"
+      v7:
+        - name: LogFormat.Name
+          configFile: logging.config
+          value: custom_ats_2
+        - name: LogObject.Filename
+          configFile: logging.config
+          value: custom_ats_2
+        - name: LogObject.Format
+          configFile: logging.config
+          value: custom_ats_2
+        - name: LogObject.RollingEnabled
+          configFile: logging.config
+          value: '3'
+        - name: LogObject.RollingIntervalSec
+          configFile: logging.config
+          value: '86400'
+        - name: LogObject.RollingOffsetHr
+          configFile: logging.config
+          value: '11'
+        - name: LogObject.RollingSizeMb
+          configFile: logging.config
+          value: '1024'
+        - name: location
+          configFile: logging.config
+          value: "/opt/trafficserver/etc/trafficserver"
+        - name: 'CONFIG proxy.config.cluster.cluster_configuration '
+          configFile: records.config
+          value: STRING cluster.config
+        - name: CONFIG proxy.config.http.connect_attempts_max_retries_dead_server
+          configFile: records.config
+          value: INT 3
+        - name: CONFIG proxy.config.http.cache.fuzz.probability
+          configFile: records.config
+          value: FLOAT 0.005
+        - name: CONFIG proxy.config.http.cache.fuzz.time
+          configFile: records.config
+          value: INT 240
+        - name: CONFIG proxy.config.http.normalize_ae_gzip
+          configFile: records.config
+          value: INT 0
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.net.max_connections_active_in
+          configFile: records.config
+          value: INT 100000
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections_queue
+          configFile: records.config
+          value: INT 0
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.parent_proxy_routing_enable
+          configFile: records.config
+          value: INT 1
+      v8:
+        - name: LogFormat.Format
+          configFile: logging.yaml
+          value: '%<cqtq> chi=%<chi> phn=%<phn> php=%<php> shn=%<shn> url=%<cquuc> cqhm=%<cqhm> cqhv=%<cqpv> pssc=%<pssc> ttms=%<ttms> b=%<pscl> sssc=%<sssc> sscl=%<sscl> cfsc=%<cfsc> pfsc=%<pfsc> crc=%<crc> phr=%<phr> pqsn=%<shn> uas=\"%<{User-Agent}cqh>\" xmt=\"%<{X-MoneyTrace}cqh>\" svc=%<{X-CDN-SVC}cqh>'
+        - name: LogFormat.Name
+          configFile: logging.yaml
+          value: custom_ats_2
+        - name: LogFormat1.Format
+          configFile: logging.yaml
+          value: '%<cqtq> chi=%<chi> phn=%<phn> php=%<php> shn=%<shn> url=%<cquuc> cqhm=%<cqhm> cqhv=%<cqpv> pssc=%<pssc> ttms=%<ttms> b=%<pscl> sssc=%<sssc> sscl=%<sscl> cfsc=%<cfsc> pfsc=%<pfsc> crc=%<crc> phr=%<phr> pqsn=%<shn> uas=\"%<{User-Agent}cqh>\" xmt=\"%<{X-MoneyTrace}cqh>\" svc=%<{X-CDN-SVC}cqh> rr=\"\"\"%<{Range}cqh>\"\"\" cl=\"\"\"%<{Content-Length}psh>\"\"\" cqhl=%<cqhl> csscl=%<csscl> cqssc=%<cqssc> cqssv=%<cqssv> ccc=\"\"\"%<{Cache-Control}cqh>\"\"\" occ=\"\"\"%<{Cache-Control}ssh>\"\"\" cocc=\"\"\"%<{Cache-Control}cssh>\"\"\" odate=\"\"\"%<{Date}ssh>\"\"\" cdate=\"\"\"%<{Date}cssh>\"\"\" olm=\"\"\"%<{Last-Modified}ssh>\"\"\" clm=\"\"\"%<{Last-Modified}cssh>\"\"\" oet=\"\"\"%<{Etag}ssh>\"\"\" cet=\"\"\"%<{Etag}cssh>\"\"\" opm=\"\"\"%<{Pragma}ssh>\"\"\" cpm=\"\"\"%<{Pragma}cssh>\"\"\" oex=\"\"\"%<{Expires}ssh>\"\"\" cex=\"\"\"%<{Expires}cssh>\"\"\" oce=\"\"\"%<{Content-Encoding}ssh>\"\"\" cce=\"\"\"%<{Content-Encoding}cssh>\"\"\" oct=\"\"\"%<{Content-Type}ssh>\"\"\" cct=\"\"\"%<{Content-Type}cssh>\"\"\" acc=\"\"\"%<{Accept}cqh>\"\"\" ace=\"\"\"%<{Accept-Encoding}cqh>\"\"\" auth=\"\"\"%<{Authorization}cqh>\"\"\" ovar=\"\"\"%<{Vary}ssh>\"\"\" cvar=\"\"\"%<{Vary}cssh>\"\"\" ccvar=\"\"\"%<{Vary}cqh>\"\"\"  nhi=%<nhi> nhp=%<nhp> pcr=\"\"\"%<{Content-Range}psh>\"\"\" xrsn=\"\"\"%<{X-Reason}psh>\"\"\" stms=%<stms>'
+        - name: LogFormat1.Name
+          configFile: logging.yaml
+          value: custom_ats_3
+        - name: LogObject.Filename
+          configFile: logging.yaml
+          value: custom_ats_2
+        - name: LogObject.Format
+          configFile: logging.yaml
+          value: custom_ats_2
+        - name: LogObject.RollingEnabled
+          configFile: logging.yaml
+          value: "'both'"
+        - name: LogObject.RollingIntervalSec
+          configFile: logging.yaml
+          value: '86400'
+        - name: LogObject.RollingOffsetHr
+          configFile: logging.yaml
+          value: '11'
+        - name: LogObject.RollingSizeMb
+          configFile: logging.yaml
+          value: '1024'
+        - name: LogObject1.Filename
+          configFile: logging.yaml
+          value: custom_ats_3
+        - name: LogObject1.Format
+          configFile: logging.yaml
+          value: custom_ats_3
+        - name: LogObject1.RollingEnabled
+          configFile: logging.yaml
+          value: '3'
+        - name: LogObject1.RollingIntervalSec
+          configFile: logging.yaml
+          value: '86400'
+        - name: LogObject1.RollingOffsetHr
+          configFile: logging.yaml
+          value: '11'
+        - name: LogObject1.RollingSizeMb
+          configFile: logging.yaml
+          value: '1024'
+        - name: location
+          configFile: logging.yaml
+          value: "/opt/trafficserver/etc/trafficserver"
+        # Default changed between ATS 7 & 8
+        - name: CONFIG proxy.config.diags.debug.tags
+          configFile: records.config
+          value: STRING http.*|dns.*
+        # Default changed between ATS 7 & 8
+        - name: CONFIG proxy.config.http.negative_revalidating_enabled
+          configFile: records.config
+          value: INT 0
+        - name: CONFIG proxy.config.http.normalize_ae
+          configFile: records.config
+          value: INT 0
+        # Default changed between ATS 7 & 8
+        - name: CONFIG proxy.config.http2.max_header_list_size
+          configFile: records.config
+          value: INT 4294967295
+        # Default changed between ATS 7 & 8
+        - name: CONFIG proxy.config.http2.initial_window_size_in
+          configFile: records.config
+          value: INT 1048576
+        - name: CONFIG proxy.config.plugin.lua.max_states
+          configFile: records.config
+          value: INT 64
+        - name: CONFIG proxy.config.restart.stop_listening
+          configFile: records.config
+          value: INT 1
+        # Default changed between ATS 7 & 8
+        - name: LOCAL proxy.local.cluster.type
+          configFile: records.config
+          value: INT 3
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.net.max_connections_active_in
+          configFile: records.config
+          value: INT 100000
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.origin_max_connections_queue
+          configFile: records.config
+          value: INT 0
+        # ATS 7,8 specific param
+        - name: CONFIG proxy.config.http.parent_proxy_routing_enable
+          configFile: records.config
+          value: INT 1
+      v9:
+        # Param change for ATS 9, from proxy.config.net.max_connections_active_in
+        - name: CONFIG proxy.config.net.max_requests_in
+          configFile: records.config
+          value: INT 100000
+        # Param change for ATS 9, from proxy.config.http.origin_max_connections_queue
+        - name: CONFIG proxy.config.http.per_server.connection.queue_size
+          configFile: records.config
+          value: INT 0
+
+# TO Profiles (templates) and associated parameters
+# These should be the profiles which vary by CDN association
+dl_ds_merged_profile_cdntemplates: "{{ dl_ds_default_profile_cdntemplates }}"
+dl_ds_default_profile_cdntemplates:
+  - name: "RASCAL_{{ Target_cdn_delegation }}"
+    description: "Traffic Monitor for the {{ Target_cdn_delegation }} CDN"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: TM_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: health.polling.interval
+        configFile: rascal-config.txt
+        value: '6000'
+        secure: 0
+      - name: heartbeat.polling.interval
+        configFile: rascal-config.txt
+        value: '2000'
+        secure: 0
+      - name: peers.polling.interval
+        configFile: rascal-config.txt
+        value: '1000'
+        secure: 0
+      - name: tm.polling.interval
+        configFile: rascal-config.txt
+        value: '60000'
+        secure: 0
+  - name: "CCR_{{ Target_cdn_delegation }}"
+    description: "Traffic Router for {{ Target_cdn_delegation }} CDN"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: TR_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: anonymousip.policy.configuration
+        configFile: CRConfig.json
+        value: "{{ dl_anonymous_ip_url }}"
+        secure: 0
+      - name: anonymousip.polling.url
+        configFile: CRConfig.json
+        value: "{{ dl_anonymous_db_url }}"
+        secure: 0
+      - name: anonymousip.polling.interval
+        configFile: CRConfig.json
+        value: '86400000'
+        secure: 0
+      - name: api.cache-control.max-age
+        configFile: CRConfig.json
+        value: '10'
+        secure: 0
+      - name: certificates.polling.interval
+        configFile: CRConfig.json
+        value: '300000'
+        secure: 0
+      - name: consistent.dns.routing
+        configFile: CRConfig.json
+        value: 'true'
+        secure: 0
+      - name: coveragezone.polling.interval
+        configFile: CRConfig.json
+        value: '3600000'
+        secure: 0
+      - name: coveragezone.polling.url
+        configFile: CRConfig.json
+        value: "{{ dl_shallow_czf_url }}"
+        secure: 0
+      - name: dnssec.dynamic.response.expiration
+        configFile: CRConfig.json
+        value: 300s
+        secure: 0
+      - name: domain_name
+        configFile: CRConfig.json
+        value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        secure: 0
+      - name: edge.dns.limit
+        configFile: CRConfig.json
+        value: '6'
+        secure: 0
+      - name: edge.dns.routing
+        configFile: CRConfig.json
+        value: 'true'
+        secure: 0
+      - name: edge.http.limit
+        configFile: CRConfig.json
+        value: '6'
+        secure: 0
+      - name: edge.http.routing
+        configFile: CRConfig.json
+        value: 'true'
+        secure: 0
+      - name: federationmapping.polling.interval
+        configFile: CRConfig.json
+        value: '60000'
+        secure: 0
+      - name: federationmapping.polling.url
+        configFile: CRConfig.json
+        value: https://${toHostname}/api/{{ dl_to_api_version }}/federations/all
+        secure: 0
+      - name: geolocation.polling.interval
+        configFile: CRConfig.json
+        value: '86400000'
+        secure: 0
+      - name: geolocation.polling.url
+        configFile: CRConfig.json
+        value: "{{ dl_geolocation_url }}"
+        secure: 0
+      - name: keystore.maintenance.interval
+        configFile: CRConfig.json
+        value: '300'
+        secure: 0
+      - name: "{{ Target_cdn_name | lower }}.dnssec.inception"
+        configFile: CRConfig.json
+        value: '1450219172'
+        secure: 0
+      - name: steeringmapping.polling.interval
+        configFile: CRConfig.json
+        value: '60000'
+        secure: 0
+      - name: tld.soa.admin
+        configFile: CRConfig.json
+        value: twelve_monkeys
+        secure: 0
+      - name: tld.soa.expire
+        configFile: CRConfig.json
+        value: '604800'
+        secure: 0
+      - name: tld.soa.minimum
+        configFile: CRConfig.json
+        value: '30'
+        secure: 0
+      - name: tld.soa.refresh
+        configFile: CRConfig.json
+        value: '28800'
+        secure: 0
+      - name: tld.soa.retry
+        configFile: CRConfig.json
+        value: '7200'
+        secure: 0
+      - name: tld.ttls.A
+        configFile: CRConfig.json
+        value: '3600'
+        secure: 0
+      - name: tld.ttls.AAAA
+        configFile: CRConfig.json
+        value: '3600'
+        secure: 0
+      - name: tld.ttls.DNSKEY
+        configFile: CRConfig.json
+        value: '30'
+        secure: 0
+      - name: tld.ttls.DS
+        configFile: CRConfig.json
+        value: '30'
+        secure: 0
+      - name: tld.ttls.NS
+        configFile: CRConfig.json
+        value: '3600'
+        secure: 0
+      - name: tld.ttls.SOA
+        configFile: CRConfig.json
+        value: '86400'
+        secure: 0
+      - name: zonemanager.cache.maintenance.interval
+        configFile: CRConfig.json
+        value: '300'
+        secure: 0
+      - name: zonemanager.threadpool.scale
+        configFile: CRConfig.json
+        value: '0.50'
+        secure: 0
+      - name: api.port
+        configFile: server.xml
+        value: '3333'
+        secure: 0
+  - name: "MSO_{{ Target_cdn_delegation }}_Primary"
+    description: "Multi-site Origin Primary Rank Servers - {{ Target_cdn_delegation }}"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ORG_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: domain_name
+        configFile: CRConfig.json
+        value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        secure: 0
+      - name: rank
+        configFile: parent.config
+        value: '1'
+        secure: 0
+      - name: weight
+        configFile: parent.config
+        value: '1.0'
+        secure: 0
+  - name: "MSO_{{ Target_cdn_delegation }}_Secondary"
+    description: "Multi-site Origin Primary Rank Servers - {{ Target_cdn_delegation }}"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ORG_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: domain_name
+        configFile: CRConfig.json
+        value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        secure: 0
+      - name: rank
+        configFile: parent.config
+        value: '2'
+        secure: 0
+      - name: weight
+        configFile: parent.config
+        value: '1.0'
+        secure: 0
+  - name: "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+    description: "Multi-site Origin Primary Weighted Servers - {{ Target_cdn_delegation }}"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ORG_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: domain_name
+        configFile: CRConfig.json
+        value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        secure: 0
+      - name: rank
+        configFile: parent.config
+        value: '1'
+        secure: 0
+      - name: weight
+        configFile: parent.config
+        value: '9.0'
+        secure: 0
+  - name: "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+    description: "Multi-site Origin Secondary Weighted Servers - {{ Target_cdn_delegation }}"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ORG_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: domain_name
+        configFile: CRConfig.json
+        value: "{{ Target_cdn_delegation_fqdn | lower }}"
+        secure: 0
+      - name: rank
+        configFile: parent.config
+        value: '1'
+        secure: 0
+      - name: weight
+        configFile: parent.config
+        value: '1'
+        secure: 0
+  - name: "EDGE_GROVE_{{ Target_cdn_delegation }}"
+    description: "Edge cache({{ Target_cdn_delegation }}) - Grove"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: GROVE_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: allow_ip
+        configFile: astats.config
+        value: "{{ dl_allow_ip4 }}"
+      - name: allow_ip6
+        configFile: astats.config
+        value: "{{ dl_allow_ip6 }}"
+      - name: cache_size_bytes
+        configFile: grove.cfg
+        value: "{{ cache_hardware_profile_index[Target_hardware_profile.value.ram_cache_size | default(0)] | default(20000) }}"
+      - name: cert_file
+        configFile: grove.cfg
+        value: "/etc/pki/tls/certs/server.crt"
+      - name: concurrent_rule_requests
+        configFile: grove.cfg
+        value: '100'
+      - name: connection_close
+        configFile: grove.cfg
+        value: 'false'
+      - name: https_port
+        configFile: grove.cfg
+        value: '443'
+      - name: interface_name
+        configFile: grove.cfg
+        value: "{{ Target_hardware_profile.value.primary_network_interface | default('eth0') }}"
+      - name: key_file
+        configFile: grove.cfg
+        value: "/etc/pki/tls/private/server.key.pem"
+      - name: log_location_debug
+        configFile: grove.cfg
+        value: 'null'
+      - name: log_location_error
+        configFile: grove.cfg
+        value: "/var/log/grove/error.log"
+      - name: log_location_event
+        configFile: grove.cfg
+        value: "/var/log/trafficserver/custom_ats_2.log"
+      - name: log_location_info
+        configFile: grove.cfg
+        value: 'null'
+      - name: log_location_warning
+        configFile: grove.cfg
+        value: "/var/log/grove/error.log"
+      - name: parent_request_idle_connection_timeout_ms
+        configFile: grove.cfg
+        value: '1000'
+      - name: parent_request_keep_alive_ms
+        configFile: grove.cfg
+        value: '1000'
+      - name: parent_request_max_idle_connections
+        configFile: grove.cfg
+        value: '1000'
+      - name: parent_request_timeout_ms
+        configFile: grove.cfg
+        value: '1000'
+      - name: plugins
+        configFile: grove.cfg
+        value: ats_log
+      - name: plugins
+        configFile: grove.cfg
+        value: http_cacheinspector
+      - name: plugins
+        configFile: grove.cfg
+        value: http_callgc
+      - name: plugins
+        configFile: grove.cfg
+        value: http_memstats
+      - name: plugins
+        configFile: grove.cfg
+        value: http_stats
+      - name: plugins
+        configFile: grove.cfg
+        value: if_modified_since
+      - name: plugins
+        configFile: grove.cfg
+        value: modify_headers
+      - name: plugins
+        configFile: grove.cfg
+        value: modify_parent_request_headers
+      - name: plugins
+        configFile: grove.cfg
+        value: modify_response_headers_global
+      - name: plugins
+        configFile: grove.cfg
+        value: plugin
+      - name: plugins
+        configFile: grove.cfg
+        value: range_request_handler
+      - name: plugins
+        configFile: grove.cfg
+        value: record_stats
+      - name: port
+        configFile: grove.cfg
+        value: '80'
+      - name: remap_rules_file
+        configFile: grove.cfg
+        value: "/etc/grove/remap.json"
+      - name: rfc_compliant
+        configFile: grove.cfg
+        value: 'false'
+      - name: server_idle_timeout_ms
+        configFile: grove.cfg
+        value: '5000'
+      - name: server_read_timeout_ms
+        configFile: grove.cfg
+        value: '5000'
+      - name: server_write_timeout_ms
+        configFile: grove.cfg
+        value: '5000'
+      - name: not_a_parent
+        configFile: parent.config
+        value: 'true'
+      - name: health.polling.url
+        configFile: rascal.properties
+        value: http://${hostname}/_astats?application=&inf.name=${interface_name}
+  - name: "EDGE_ATS_7_{{ Target_cdn_delegation }}"
+    description: "Edge cache({{ Target_cdn_delegation }}) - ATS 7"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.edge.common + dl_ds_default_profile_layers.ats.edge['v'+dl_ds_ats_major_version] }}"
+  - name: "EDGE_ATS_8_{{ Target_cdn_delegation }}"
+    description: "Edge cache({{ Target_cdn_delegation }}) - ATS 8"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.edge.common + dl_ds_default_profile_layers.ats.edge['v'+dl_ds_ats_major_version] }}"
+  - name: "EDGE_ATS_9_{{ Target_cdn_delegation }}"
+    description: "Edge cache({{ Target_cdn_delegation }}) - ATS 9"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.edge.common + dl_ds_default_profile_layers.ats.edge['v'+dl_ds_ats_major_version] }}"
+  - name: "MID_ATS_7_{{ Target_cdn_delegation }}"
+    description: "Mid cache({{ Target_cdn_delegation }}) - ATS 7"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.mid.common + dl_ds_default_profile_layers.ats.mid['v'+dl_ds_ats_major_version] }}"
+  - name: "MID_ATS_8_{{ Target_cdn_delegation }}"
+    description: "Mid cache({{ Target_cdn_delegation }}) - ATS 8"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.mid.common + dl_ds_default_profile_layers.ats.mid['v'+dl_ds_ats_major_version] }}"
+  - name: "MID_ATS_9_{{ Target_cdn_delegation }}"
+    description: "Mid cache({{ Target_cdn_delegation }}) - ATS 9"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: ATS_PROFILE
+    routingDisabled: false
+    parameters: "{{ dl_ds_default_profile_layers.ats.common.common + dl_ds_default_profile_layers.ats.common['v'+dl_ds_ats_major_version] + dl_ds_default_profile_layers.ats.mid.common + dl_ds_default_profile_layers.ats.mid['v'+dl_ds_ats_major_version] }}"
+  - name: "DS_{{ target_xmlId }}_consistenthash"
+    description: "MSO {{ target_xmlId }} - consistent hash"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: DS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: mso.parent_retry
+        configFile: parent.config
+        value: both
+        secure: 0
+      - name: mso.algorithm
+        configFile: parent.config
+        value: consistent_hash
+        secure: 0
+      - name: mso.unavailable_server_retry_responses
+        configFile: parent.config
+        value: "500,502,503"
+        secure: 0
+      - name: mso.max_unavailable_server_retries
+        configFile: parent.config
+        value: 3
+        secure: 0
+  - name: "DS_{{ target_xmlId }}_false"
+    description: "MSO {{ target_xmlId }} - false"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: DS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: mso.parent_retry
+        configFile: parent.config
+        value: both
+        secure: 0
+      - name: mso.algorithm
+        configFile: parent.config
+        value: false
+        secure: 0
+      - name: mso.unavailable_server_retry_responses
+        configFile: parent.config
+        value: "500,502,503"
+        secure: 0
+      - name: mso.max_unavailable_server_retries
+        configFile: parent.config
+        value: 3
+        secure: 0
+  - name: "DS_{{ target_xmlId }}_latched"
+    description: "MSO {{ target_xmlId }} - latched"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: DS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: mso.parent_retry
+        configFile: parent.config
+        value: both
+        secure: 0
+      - name: mso.algorithm
+        configFile: parent.config
+        value: latched
+        secure: 0
+      - name: mso.unavailable_server_retry_responses
+        configFile: parent.config
+        value: "500,502,503"
+        secure: 0
+      - name: mso.max_unavailable_server_retries
+        configFile: parent.config
+        value: 3
+        secure: 0
+  - name: "DS_{{ target_xmlId }}_strict"
+    description: "MSO {{ target_xmlId }} - consistent hash"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: DS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: mso.parent_retry
+        configFile: parent.config
+        value: both
+        secure: 0
+      - name: mso.algorithm
+        configFile: parent.config
+        value: strict
+        secure: 0
+      - name: mso.unavailable_server_retry_responses
+        configFile: parent.config
+        value: "500,502,503"
+        secure: 0
+      - name: mso.max_unavailable_server_retries
+        configFile: parent.config
+        value: 3
+        secure: 0
+  - name: "DS_{{ target_xmlId }}_true"
+    description: "MSO {{ target_xmlId }} - consistent hash"
+    cdn: "{{ Target_cdn_delegation }}"
+    type: DS_PROFILE
+    routingDisabled: false
+    parameters:
+      - name: mso.parent_retry
+        configFile: parent.config
+        value: both
+        secure: 0
+      - name: mso.algorithm
+        configFile: parent.config
+        value: true
+        secure: 0
+      - name: mso.unavailable_server_retry_responses
+        configFile: parent.config
+        value: "500,502,503"
+        secure: 0
+      - name: mso.max_unavailable_server_retries
+        configFile: parent.config
+        value: 3
+        secure: 0
+
+# Lookup table for Delivery Service Geolimit field to use more descriptive words rather than integers
+dl_ds_lookup_geolimit:
+  disabled: 0
+  czf_only: 1
+  czf_usa_only: 2
+
+# Lookup table for Delivery Service Protocol field to use more descriptive words rather than integers
+dl_ds_lookup_protocol:
+  HTTP: 0
+  HTTPS: 1
+  HTTP and HTTPS: 2
+  HTTP to HTTPS: 3
+
+# Lookup table for Delivery Service Geolocation data provider field to use more descriptive words rather than integers
+dl_ds_lookup_geoProvider:
+  Maxmind: 0
+  Neustar: 1
+
+# Lookup table for Delivery Service Query string handling field to use more descriptive words rather than integers
+dl_ds_lookup_qstringIgnore:
+  use in cache key and pass up: 0
+  ignore in cache key and pass up: 1
+  drop at edge: 2
+
+# Lookup table for Delivery Service Range Request Handling field to use more descriptive words rather than integers
+dl_ds_lookup_rangeRequestHandling:
+  do not cache: 0
+  use background fetch: 1
+  use cache range requests plugin: 2
+
+# Default Delivery Service fields
+dl_ds_default_ds:
+  active: true
+  anonymousBlockingEnabled: false
+  ccrDnsTtl: 3600
+  checkPath: "/crossdomain.xml"
+  deepCachingType: NEVER
+  dscp: 0
+  geoLimitName: disabled
+  geoProviderName: Maxmind
+  initialDispersion: 1
+  ipv6RoutingEnabled: true
+  logsEnabled: false
+  longDesc: A generic DS
+  missLat: 41.881944
+  missLong: -87.627778
+  multiSiteOrigin: false
+  protocolName: HTTP
+  qstringIgnoreName: use in cache key and pass up
+  rangeRequestHandlingName: do not cache
+  regionalGeoBlocking: false
+  routingName: edge
+  tenantName: root
+  typeName: HTTP
+  serveFromATS: true
+  serveFromGrove: false
+  eligible_mso_server_profile_names: []
+
+# Sample Delivery Services
+dl_ds_merged_ds_template: "{{ dl_ds_default_ds_template }}"
+dl_ds_default_ds_template:
+  - displayName: Simple HTTP DS
+    longDesc: A basic HTTP routed Delivery Service
+    longDesc1: A longDesc1
+    longDesc2: A longDesc2
+    uniqueKey: simple-http
+  - displayName: Simple HTTP Live DS
+    longDesc: A basic HTTP Live routed Delivery Service
+    typeName: HTTP_LIVE
+    uniqueKey: simple-http-live
+  - displayName: Simple HTTP Live National DS
+    longDesc: A basic HTTP Live National routed Delivery Service
+    typeName: HTTP_LIVE_NATNL
+    uniqueKey: simple-http-live-nat
+  - displayName: Simple HTTP No Cache DS
+    longDesc: A basic HTTP No Cache routed Delivery Service
+    typeName: HTTP_NO_CACHE
+    uniqueKey: simple-http-no-cache
+  - displayName: Simple HTTP DS
+    longDesc: A basic DNS routed Delivery Service
+    typeName: DNS
+    uniqueKey: simple-dns
+  - displayName: Simple HTTP DS for Federation
+    longDesc: A basic DNS routed Delivery Service for use with a Federation
+    typeName: DNS
+    uniqueKey: simple-dns-for-federation
+  - displayName: Simple DNS Live DS
+    longDesc: A basic DNS Live routed Delivery Service
+    typeName: DNS_LIVE
+    uniqueKey: simple-dns-live
+  - displayName: Simple DNS Live National DS
+    longDesc: A basic DNS Live National routed Delivery Service
+    typeName: DNS_LIVE_NATNL
+    uniqueKey: simple-dns-live-nat
+  - displayName: Global ANY_MAP DS
+    longDesc: A basic ANY_MAP routed Delivery Service to catch all unmapped ATS requests and add some extra headers
+    remapText: "map / http://{{ dl_hosts_fakeorigin | first }}/ @plugin=header_rewrite.so @pparam=anymap_hdr_rw.config"
+    typeName: ANY_MAP
+    uniqueKey: global-any-map
+  - displayName: Steering with ordered targets DS
+    longDesc: A basic Steering routed Delivery Service using ordered targets
+    typeName: STEERING
+    uniqueKey: steering-ordered
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_ORDER
+        value: 1
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_ORDER
+        value: 2
+  - displayName: Steering with weighted targets DS
+    longDesc: A basic Steering routed Delivery Service using weighted targets
+    typeName: STEERING
+    uniqueKey: steering-weighted
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_WEIGHT
+        value: 9
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_WEIGHT
+        value: 1
+  - displayName: Client Steering with ordered targets DS
+    longDesc: A basic Client Steering routed Delivery Service using ordered targets
+    typeName: CLIENT_STEERING
+    uniqueKey: client-steering-ordered
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_ORDER
+        value: 1
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_ORDER
+        value: 2
+  - displayName: Client Steering with weighted targets DS
+    longDesc: A basic Client Steering routed Delivery Service using weighted targets
+    typeName: CLIENT_STEERING
+    uniqueKey: client-steering-weighted
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_WEIGHT
+        value: 9
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_WEIGHT
+        value: 1
+  - displayName: Client Steering with geo weighted targets DS
+    longDesc: A basic Client Steering routed Delivery Service using geo weighted targets
+    typeName: CLIENT_STEERING
+    uniqueKey: client-steering-geoweighted
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_GEO_WEIGHT
+        value: 9
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_GEO_WEIGHT
+        value: 1
+  - displayName: Client Steering with geo ordered targets DS
+    longDesc: A basic Client Steering routed Delivery Service using geo ordered targets
+    typeName: CLIENT_STEERING
+    uniqueKey: client-steering-geoordered
+    assigned_steering_targets:
+      - uniqueKey: simple-steering-target-1
+        type: STEERING_GEO_ORDER
+        value: 1
+      - uniqueKey: simple-steering-target-2
+        type: STEERING_GEO_ORDER
+        value: 2
+  - displayName: Simple HTTP and HTTPS DS Steering Target 1
+    longDesc: A HTTP and HTTPS Steering Target Delivery Service - 1
+    protocolName: HTTP and HTTPS
+    uniqueKey: simple-steering-target-1
+  - displayName: Simple HTTP and HTTPS DS Steering Target 2
+    longDesc: A HTTP to HTTPS Steering Target Delivery Service - 2
+    protocolName: HTTP and HTTPS
+    uniqueKey: simple-steering-target-2
+  - displayName: Simple HTTP routed HTTP to HTTPS DS
+    longDesc: A HTTP routed HTTP to HTTPS Delivery Service
+    protocolName: HTTP to HTTPS
+    uniqueKey: simple-http-http2https
+  - displayName: Simple QString used DS
+    longDesc: A basic HTTP routed Delivery Service with QString used
+    qstringIgnoreName: use in cache key and pass up
+    uniqueKey: simple-qstring-use
+  - displayName: Simple QString ignored DS
+    longDesc: A basic HTTP routed Delivery Service with QString ignored
+    qstringIgnoreName: ignore in cache key and pass up
+    uniqueKey: simple-qstring-ignored
+  - displayName: Simple QString dropped DS
+    longDesc: A basic HTTP routed Delivery Service with QString dropped
+    qstringIgnoreName: drop at edge
+    uniqueKey: simple-qstring-dropped
+  - active: false
+    displayName: Simple inactive DS
+    longDesc: A basic inactive DS
+    uniqueKey: simple-inactive
+  - displayName: Simple unassigned tenant DS
+    longDesc: A basic unassigned tenant DS
+    tenantName: unassigned
+    uniqueKey: simple-unassigned
+  - displayName: Simple HTTP Live DS - Grove
+    longDesc: A basic HTTP Live routed Delivery Service Served by Grove
+    typeName: HTTP_LIVE
+    uniqueKey: simple-http-live-grove
+    serveFromGrove: true
+    serveFromATS: false
+  - displayName: MSO Rank ConsistentHash
+    longDesc: A MSO delivery service using ranked parents and consistent hash algorithm
+    uniqueKey: mso-rank-consistenthash
+    profileNameSuffix: _consistenthash
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Secondary"
+  - displayName: MSO Weight ConsistentHash
+    longDesc: A MSO delivery service using weighted parents and consistent hash algorithm
+    uniqueKey: mso-weight-consistenthash
+    profileNameSuffix: _consistenthash
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+  - displayName: MSO Weight False
+    longDesc: A MSO delivery service using weighted parents and false algorithm
+    uniqueKey: mso-weight-false
+    profileNameSuffix: _false
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+  - displayName: MSO Weight Latched
+    longDesc: A MSO delivery service using weighted parents and latched algorithm
+    uniqueKey: mso-weight-latched
+    profileNameSuffix: _latched
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+  - displayName: MSO Weight Strict
+    longDesc: A MSO delivery service using weighted parents and strict algorithm
+    uniqueKey: mso-weight-strict
+    profileNameSuffix: _strict
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+  - displayName: MSO Weight True
+    longDesc: A MSO delivery service using weighted parents and true algorithm
+    uniqueKey: mso-weight-true
+    profileNameSuffix: _true
+    eligible_mso_server_profile_names:
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Primary"
+      - "MSO_{{ Target_cdn_delegation }}_Weighted_Secondary"
+  - displayName: HTTP Routed with Anonymous IP Block
+    longDesc: A basic HTTP routed Delivery Service with Anonymous IP Block Enabled
+    anonymousBlockingEnabled: true
+    uniqueKey: simple-http-anon-block
+
+# Federations
+dl_ds_default_federation_user: federationuser
+dl_ds_merged_federations: "{{ dl_ds_default_federations }}"
+dl_ds_default_federations:
+  - deliveryService: simple-dns-for-federation-{{ Target_cdn_delegation | lower }}
+    mappings:
+      cname: 'foo.kabletown.net.'
+      resolvers:
+        resolve4:
+          - '0.0.0.0/0'
+        resolve6:
+          - '::/0'
+      ttl: 60
+    user: '{{ dl_ds_default_federation_user }}'

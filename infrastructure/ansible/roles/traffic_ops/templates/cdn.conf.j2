@@ -1,0 +1,104 @@
+{#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#}
+{
+   "cors" : {
+      "access_control_allow_origin" : "{{ to_cors_access_control_allow_origin }}"
+   },
+   "inactivity_timeout" : {{ to_inactivity_timeout }},
+   "influxdb_conf_path" : "{{ to_influxdb_conf_path }}",
+   "portal" : {
+      "base_url" : "{{ to_portal_base_url }}",
+      "docs_url" : "{{ to_portal_docs_url }}",
+      "email_from" : "{{ to_portal_email_from }}",
+      "pass_reset_path" : "{{ to_portal_pass_reset_path }}",
+      "user_register_path" : "{{ to_portal_user_register_path }}"
+   },
+   "secrets" : [
+      "{{ to_secrets | join("\",\n\t\t\"") }}"
+   ],
+   "to" : {
+      "base_url" : "{{ to_base_url }}",
+      "email_from" : "{{ to_email_from }}",
+      "no_account_found_msg" : "{{ to_account_missing_msg }}"
+   },
+   "smtp" : {
+      "enabled" : {{ to_smtp_enabled | bool | lower }},
+      "user" : "{{ to_smtp_username }}",
+      "password" : "{{ to_smtp_password }}",
+      "address" : "{{ to_smtp_address }}"
+   },
+   "user_cache_refresh_interval_sec": {{ to_user_cache_refresh_interval_sec }},
+   "server_update_status_cache_refresh_interval_sec": {{ to_server_update_status_cache_refresh_interval_sec }},
+   "disable_auto_cert_deletion": {{ to_disable_auto_cert_deletion | bool | lower }},
+   "use_ims": {{ to_use_ims | bool | lower }},
+   "role_based_permissions": {{ to_use_rbp | bool | lower }},
+   "traffic_ops_golang" : {
+      "cert" : "{{ to_certs_cert }}",
+      "key" : "{{ to_certs_key }}",
+      "idle_timeout" : {{ to_go_inactive_timeout }},
+      "log_location_debug" : "{{ to_go_logging_file_debug }}",
+      "log_location_error" : "{{ to_go_logging_file_error }}",
+      "log_location_event" : "{{ to_go_logging_file_event }}",
+      "log_location_info" : "{{ to_go_logging_file_info }}",
+      "log_location_warning" : "{{ to_go_logging_file_warn }}",
+      "max_db_connections" : {{ to_go_max_db_connections }},
+      "db_max_idle_connections": {{ to_go_db_max_idle_connections }},
+      "db_conn_max_lifetime_seconds": {{ to_go_db_conn_max_lifetime_seconds }},
+      "db_query_timeout_seconds" : {{ to_go_db_query_timeout_seconds }},
+      "port" : "{{ to_go_port }}",
+      "proxy_keep_alive" : {{ to_go_proxy_keep_alive }},
+      "proxy_read_header_timeout" : {{ to_go_proxy_read_header_timeout }},
+      "proxy_timeout" : {{ to_go_proxy_timeout }},
+      "proxy_tls_timeout" : {{ to_go_proxy_tls_timeout }},
+      "read_header_timeout" : {{ to_go_read_header_timeout }},
+      "read_timeout" : {{ to_go_read_timeout }},
+      "write_timeout" : {{ to_go_write_timeout }},
+      "supported_ds_metrics" : {{ to_go_supported_ds_metrics | to_json }},
+      "plugins": {{ to_plugin_config.keys() | list | to_json }},
+      "plugin_config" : {{ to_plugin_config | to_nice_json(indent=2) }},
+      "traffic_vault_backend": "{{ to_traffic_vault_backend }}",
+      "tls_config": {
+         "ClientAuth": {{ to_go_client_auth_enabled }}
+      },
+      "traffic_vault_config": {
+{% if to_traffic_vault_backend == "postgres" %}
+         "dbname": "{{ to_tvdb_db_name }}",
+         "hostname": "{{ to_tvdb_host }}",
+         "port": {{ to_tvdb_port }},
+         "user": "{{ to_tvdb_username }}",
+         "password": "{{ to_tvdb_password }}",
+         "aes_key_location": "{{ to_tvdb_aes_key_loc }}"
+{% else %}
+         "user": "{{ to_riak_username }}",
+         "password": "{{ to_riak_username_password }}",
+         "MaxTLSVersion": "{{ to_riak_tls_max_version }}"
+{% endif %}
+      },
+      "whitelisted_oauth_urls": {{ to_go_whitelisted_oauth_urls | to_json }},
+      "oauth_client_secret": "{{ to_go_oauth_client_secret }}",
+      "oauth_user_attribute": "{{ to_go_oauth_user_attribute }}"
+   },
+{% if to_go_client_auth_enabled == 1 %}
+   "client_certificate_authentication" : {
+      "root_certificates_directory" : "{{ to_client_cert_root_directory }}"
+   },
+{% endif %}
+   "lets_encrypt": {
+      "user_email": "{{ to_le_user_email }}",
+      "send_expiration_email": {{ to_le_send_expiration_email | bool | lower }},
+      "convert_self_signed": {{ to_le_convert_self_signed | bool | lower }},
+      "renew_days_before_expiration": {{ to_le_renew_days_before_expiration | int }},
+      "environment": "{{ to_le_environment }}"
+   }
+}

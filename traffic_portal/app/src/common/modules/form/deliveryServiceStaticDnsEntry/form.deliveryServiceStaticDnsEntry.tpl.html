@@ -1,0 +1,84 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<div class="x_panel">
+    <div class="x_title">
+        <ol class="breadcrumb pull-left">
+            <li><a ng-click="navigateToPath('/delivery-services')">Delivery Services</a></li>
+            <li><a ng-click="navigateToPath('/delivery-services/' + deliveryService.id + '?dsType=' + deliveryService.type)">{{deliveryService.xmlId}}</a></li>
+            <li><a ng-click="navigateToPath('/delivery-services/' + deliveryService.id + '/static-dns-entries')">Static DNS Entries</a></li>
+            <li class="active">{{host}}</li>
+        </ol>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+        <br>
+        <form name="dsStaticDnsEntryForm" class="form-horizontal form-label-left">
+            <div class="form-group" ng-class="{'has-error': hasError(dsStaticDnsEntryForm.host), 'has-feedback': hasError(dsStaticDnsEntryForm.host)}">
+                <label for="host" class="control-label col-md-2 col-sm-2 col-xs-12">Host *</label>
+                <div class="col-md-10 col-sm-10 col-xs-12">
+                    <input id="host" name="host" type="text" class="form-control" ng-model="staticDnsEntry.host" required autofocus>
+                    <small class="input-error" ng-show="hasPropertyError(dsStaticDnsEntryForm.host, 'required')">Required</small>
+                    <span ng-show="hasError(dsStaticDnsEntryForm.host)" class="form-control-feedback"><i class="fa fa-times"></i></span>
+                </div>
+            </div>
+            <div class="form-group" ng-class="{'has-error': hasError(dsStaticDnsEntryForm.typeId), 'has-feedback': hasError(dsStaticDnsEntryForm.typeId)}">
+                <label for="typeId" class="control-label col-md-2 col-sm-2 col-xs-12">Type *</label>
+                <div class="col-md-10 col-sm-10 col-xs-12">
+                    <select id="typeId" name="typeId" class="form-control" ng-model="staticDnsEntry.typeId" ng-options="type.id as type.name for type in types" required>
+                        <option disabled hidden value="">Select...</option>
+                    </select>
+                    <small class="input-error" ng-show="hasPropertyError(dsStaticDnsEntryForm.typeId, 'required')">Required</small>
+                </div>
+            </div>
+            <div class="form-group" ng-class="{'has-error': hasError(dsStaticDnsEntryForm.ttl), 'has-feedback': hasError(dsStaticDnsEntryForm.ttl)}">
+                <label for="ttl" class="control-label col-md-2 col-sm-2 col-xs-12">TTL *</label>
+                <div class="col-md-10 col-sm-10 col-xs-12">
+                    <input id="ttl" name="ttl" type="number" class="form-control" ng-model="staticDnsEntry.ttl" min="0" step="1" pattern="\d+" required>
+                    <small class="input-error" ng-show="hasPropertyError(dsStaticDnsEntryForm.ttl, 'required')">Required</small>
+                    <small class="input-error" ng-show="hasPropertyError(dsStaticDnsEntryForm.ttl, 'step') || hasPropertyError(dsStaticDnsEntryForm.ttl, 'min') || hasPropertyError(dsStaticDnsEntryForm.ttl, 'pattern')">Whole Number</small>
+                    <span ng-show="hasError(dsStaticDnsEntryForm.ttl)" class="form-control-feedback"><i class="fa fa-times"></i></span>
+                </div>
+            </div>
+            <div class="form-group" ng-class="{'has-error': hasError(dsStaticDnsEntryForm.address), 'has-feedback': hasError(dsStaticDnsEntryForm.address)}">
+                <label for="address" class="has-tooltip control-label col-md-2 col-sm-2 col-xs-12">Address *<div class="helptooltip">
+                    <div class="helptext">The Address Rules.
+                        <ul>
+                            <li>Type:A_RECORD, address should be an IPv4 address.</li>
+                            <li>Type:AAAA_RECORD, address should be an IPv6 address.</li>
+                            <li>Type:CNAME, address must be a valid DNS name ending with a trailing period.</li>
+                            <li>Type:TXT_RECORD, address cannot be blank.</li>
+                        </ul>
+                    </div>
+                </div>
+                </label>
+                <div class="col-md-10 col-sm-10 col-xs-12">
+                    <input id="address" name="address" type="text" class="form-control" ng-model="staticDnsEntry.address"
+                           required title="Address must be: an IPv4, if type:A_RECORD; an IPv6, if type: AAAA_RECORD; valid DNS name ending with a trailing period, if type:CNAME_RECORD; cannot be blank, if type: TXT_RECORD">
+                    <small class="input-error" ng-show="hasPropertyError(dsStaticDnsEntryForm.address, 'required')">Required</small>
+                    <span ng-show="hasError(dsStaticDnsEntryForm.address)" class="form-control-feedback"><i class="fa fa-times"></i></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" ng-show="!settings.isNew" ng-click="confirmDelete(staticDnsEntry)">Delete</button>
+                <button class="btn btn-success" ng-disabled="dsStaticDnsEntryForm.$pristine || dsStaticDnsEntryForm.$invalid" ng-click="save(deliveryService.id, staticDnsEntry)">{{settings.saveLabel}}</button>
+            </div>
+        </form>
+    </div>
+</div>

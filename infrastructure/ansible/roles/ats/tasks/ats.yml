@@ -1,0 +1,128 @@
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+- name: Install ORT/t3c
+  yum:
+    name:
+      - "{{ ort_pkg_name }}"
+    state: present
+    lock_timeout: 300
+    enablerepo: "{{ additional_yum_repos | default([]) }}"
+  retries: 5
+  delay: 5
+
+- name: Deploy ORT/t3c Crontab
+  template:
+    src: crontab.j2
+    dest: /etc/cron.d/ats
+    owner: root
+    group: root
+    mode: u+rw
+  no_log: True
+
+- name: Stop ATS Nicely
+  systemd:
+    name: trafficserver
+    state: stopped
+  ignore_errors: true
+
+- name: Create tmp dir for t3c log
+  file:
+    path: /tmp/trafficcontrol-cache-config
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Run ORT Badass
+  shell:
+    executable: "{{ lookup('pipe','command -v bash') }}"
+    cmd: "pkill -9 t3c || true; t3c apply --run-mode=badass --git=yes --cache-host-name='{{ (ansible_nodename.split('.')) | first }}' -vv --traffic-ops-url='{{ ort_traffic_ops_url }}' --traffic-ops-user='{{ ort_traffic_ops_username }}' --traffic-ops-password='{{ ort_traffic_ops_password }}' --wait-for-parents=false 2>&1 | tee /tmp/trafficcontrol-cache-config/badass_out; exit ${PIPESTATUS[0]}"
+  no_log: True
+
+- name: Reboot
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+
+- name: Allow the host to go down
+  pause:
+    seconds: 60
+
+- name: Wait for the reboot to complete
+  wait_for_connection:
+    connect_timeout: 40
+    sleep: 10
+    delay: 10
+    timeout: 600
+
+- name: Reset ATS Cache Data
+  block:
+    - name: Stop ATS gracefully
+      systemd:
+        name: trafficserver
+        state: stopped
+      ignore_errors: yes
+
+    - name: Ask ATS to destroy all its data nicely
+      command: /opt/trafficserver/bin/traffic_server -Cclear
+
+    - name: Get list of targeted ATS cache disks
+      shell: cat /opt/trafficserver/etc/trafficserver/storage.config | grep -ve '#' -ve '^$' | cut -d' ' -f1
+      register: cachedisk_results
+      changed_when: false
+
+    - name: Remove from fstab
+      lineinfile:
+        path: /etc/fstab
+        state: absent
+        regexp: "{{ item }}.*"
+      with_items: "{{ cachedisk_results.stdout_lines }}"
+
+    - name: Unmount the disk
+      command: "umount -l {{ item }}"
+      with_items: "{{ cachedisk_results.stdout_lines }}"
+      register: umountresults
+      failed_when: false
+      changed_when: "'not mounted' not in umountresults.stderr"
+
+    - name: Nuke the disk partition table
+      command: "dd if=/dev/zero of={{ item }} bs=2048 count=1"
+      with_items: "{{ cachedisk_results.stdout_lines }}"
+      register: ddresults
+      changed_when: "'2048 bytes (2.0 kB) copied' in ddresults.stderr"
+
+    - name: Restart ATS with clean cache disks
+      systemd:
+        name: trafficserver
+        state: started
+  when: ats_clear_data | default(false)
+
+- name: Ensure ATS is listening - 80
+  wait_for:
+    host: "{{ hostvars[inventory_hostname].ansible_host }}"
+    port: 80
+
+- name: Ensure ATS is listening - 443
+  wait_for:
+    host: "{{ hostvars[inventory_hostname].ansible_host }}"
+    port: 443
+  when: hostvars[inventory_hostname].component == "atsec"
+
+- name: Ensure Astats responds
+  uri:
+    url: http://localhost/_astats
+    validate_certs: false
+  when: hostvars[inventory_hostname].component == "atsec"

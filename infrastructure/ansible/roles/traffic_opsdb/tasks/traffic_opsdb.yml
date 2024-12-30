@@ -1,0 +1,169 @@
+---
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: Check that valid postgresql version was passed
+  assert:
+    that:
+      - " valid_major_version == 'true' "
+      - " valid_minor_version == 'true' "
+      - " valid_build_version == 'true' "
+
+- name: Install Postgres
+  package:
+    name:
+      - "{{ postgresql_server_pkg_name }}"
+      - "{{ postgresql_client_pkg_name }}"
+      - "{{ postgresql_devel_pkg_name }}"
+      - gcc
+      - "python{{ ansible_python.version.major }}-devel"
+    state: present
+    lock_timeout: 300
+    enablerepo: "{{ additional_yum_repos | default([]) }}"
+  retries: 5
+  delay: 5
+  notify: Restart Traffic OpsDB
+
+- name: Ensure postgres data directory exists
+  file:
+    state: directory
+    path: "{{ postgresql_datadir }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0700
+  notify: Restart Traffic OpsDB
+
+- name: Initialize database
+  command: "{{ pgdb_init_command }}"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  args:
+    creates: "{{ postgresql_datadir }}/pg_hba.conf"
+  notify: Restart Traffic OpsDB
+
+- name: Update the systemd definition of PGDATA
+  ini_file:
+    create: false
+    path: "{{ pg_service_path }}"
+    section: Service
+    option: Environment
+    value: "PGDATA={{ postgresql_datadir }}"
+  notify: Restart Traffic OpsDB
+
+- name: Refresh Systemd
+  systemd:
+    daemon_reload: true
+
+- name: Add Postgres bin dir to system-wide $PATH.
+  copy:
+    dest: "{{ pg_profile_path }}"
+    content: PATH=$PATH:{{ pg_bin_path }}
+
+- name: Install psycopg2 python module
+  pip:
+    name:
+      - psycopg2
+    extra_args: "--ignore-installed"
+  environment:
+    PATH: "{{ pg_bin_path }}:{{ lookup('env', 'PATH') }}"
+
+- name: Render pgpass file for TrafficOps
+  template:
+    src: .pgpass.j2
+    dest: "~{{ postgresql_user }}/.pgpass"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+
+- name: Apply Postgresql Configs
+  template:
+    src: "templates/{{ _loop_ittr }}.j2"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0700
+    dest: "{{ postgresql_datadir }}/{{ _loop_ittr }}"
+  loop:
+    - pg_hba.conf
+    - postgresql.conf
+  loop_control:
+    loop_var: _loop_ittr
+  notify: Restart Traffic OpsDB
+
+- name: Copy in SSL certificate
+  copy:
+    src: /etc/pki/tls/certs/server.crt
+    dest: "{{ postgresql_datadir }}/server.crt"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+    remote_src: true
+  notify: Restart Traffic OpsDB
+
+- name: Copy in SSL private key
+  copy:
+    src: /etc/pki/tls/private/server.key.pem
+    dest: "{{ postgresql_datadir }}/server.key"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+    remote_src: true
+  notify: Restart Traffic OpsDB
+
+- name: Copy in SSL CA certificate
+  copy:
+    src: /etc/pki/ca-trust/source/anchors/lab.rootca.crt
+    dest: "{{ postgresql_certs_ca }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0600
+    remote_src: true
+  notify: Restart Traffic OpsDB
+
+- name: Update Log Directory Permissions
+  file:
+    state: directory
+    path: /var/log/postgresql
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    mode: 0775
+  notify: Restart Traffic OpsDB
+
+- name: Enable and start TODB
+  systemd:
+    name: "{{ _loop_ittr }}"
+    enabled: true
+    state: started
+  loop:
+    - "{{ pg_service_name }}"
+  loop_control:
+    loop_var: _loop_ittr
+
+- name: Wait for TODB to Init Postgres and become available
+  wait_for:
+    port: "{{ postgresql_port }}"
+    delay: 3
+
+- name: Create Postgres Replication Database User
+  postgresql_user:
+    encrypted: true
+    name: "{{ postgresql_replica_user }}"
+    password: "{{ postgresql_replica_user_password }}"
+    port: "{{ postgresql_port }}"
+    login_host: 127.0.0.1
+    role_attr_flags: REPLICATION
+    ssl_rootcert: "{{ postgresql_certs_ca }}"
+  no_log: true
+  notify: Restart Traffic OpsDB
+  when:
+    - (postgresql_replica_user is defined) and postgresql_replica_user
+    - (postgresql_replica_user_password is defined) and postgresql_replica_user_password

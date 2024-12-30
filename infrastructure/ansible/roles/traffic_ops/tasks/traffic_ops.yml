@@ -1,0 +1,251 @@
+---
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: Check that valid postgresql version was passed
+  assert:
+    that:  
+      - " valid_major_version == 'true' "
+      - " valid_minor_version == 'true' "
+      - " valid_build_version == 'true' "
+    
+- name: Install Postgres client tools
+  yum:
+    name:
+      - "{{ postgresql_client_pkg_name }}"
+    state: present
+    lock_timeout: 300
+    enablerepo: "{{ additional_yum_repos | default([]) }}"
+  retries: 5
+  delay: 5
+
+- name: Add Postgres96 bin dir to system-wide $PATH.
+  copy:
+    dest: "{{ pg_profile_path }}"
+    content: PATH=$PATH:{{ pg_bin_path }}
+
+- name: Install Traffic Ops
+  yum:
+    name: "{{ to_pkg_name }}"
+    state: installed
+    lock_timeout: 300
+    enablerepo: "{{ additional_yum_repos | default([]) }}"
+  notify: Restart Traffic Ops
+  retries: 5
+  delay: 5
+
+- name: Check if Postinstall has already been run
+  stat:
+    path: "{{ to_install_bin_installdir }}/postinstall.complete"
+  register: PostinstallComplete
+
+- name: Run Traffic Ops Postinstall
+  block:
+    - name: Render Traffic Ops Postinstall Answers
+      template:
+        src: "postinstall.input.j2"
+        owner: "{{ to_user }}"
+        group: "{{ to_group }}"
+        mode: 0600
+        dest: "{{ to_install_bin_installdir }}/configuration_file.json"
+      vars:
+        to_pi_openssl_generate_certificate: "no"
+      no_log: true
+
+    - name: Run Traffic Ops Postinstall
+      shell: "{{ to_install_bin_installdir }}/postinstall -a -cfile {{ to_install_bin_installdir }}/configuration_file.json 2>&1"
+      notify: Restart Traffic Ops
+      environment:
+        GOPATH: /opt/traffic_ops/go
+      register: Postinstall_output
+      failed_when:
+        (Postinstall_output.stdout.find("Success! Postinstall complete.") == -1) or
+        (Postinstall_output.rc != 0) or
+        (Postinstall_output.stderr.find("Installing modules failed") != -1) or
+        (Postinstall_output.stdout.find("Installing modules failed") != -1) or
+        (Postinstall_output.stdout.find("Database migrate failed") != -1)
+
+    - name: Mark Postinstall was successful
+      file:
+        path: "{{ to_install_bin_installdir }}/postinstall.complete"
+        state: touch
+
+  always:
+    - name: Cleanup the Postinstall Answers
+      file:
+        path: "{{ to_install_bin_installdir }}/configuration_file.json"
+        state: absent
+  when: PostinstallComplete.stat.exists == False
+
+- name: Enable & Stop Traffic Ops Service
+  systemd:
+    name: traffic_ops
+    enabled: yes
+    daemon_reload: yes
+    state: stopped
+  notify: Restart Traffic Ops
+
+- name: Render Traffic Ops database configuration file
+  template:
+    src: "dbconf.yml.j2"
+    owner: "{{ to_user }}"
+    group: "{{ to_group }}"
+    mode: 0600
+    dest: "{{ to_db_installdir }}/dbconf.yml"
+  notify: Restart Traffic Ops
+
+- name: Render Traffic Vault database configuration file
+  template:
+    src: "trafficvault_dbconf.yml.j2"
+    owner: "{{ to_user }}"
+    group: "{{ to_group }}"
+    mode: 0600
+    dest: "{{ to_db_installdir }}/trafficvault/dbconf.yml"
+  notify: Restart Traffic Ops
+
+- name: Render Traffic Vault database AES key file
+  template:
+    src: "aes.key.j2"
+    owner: "{{ to_user }}"
+    group: "{{ to_group }}"
+    mode: 0600
+    dest: "{{ to_tvdb_aes_key_loc }}"
+  notify: Restart Traffic Ops
+
+- name: Remove LDAP config if LDAP not used
+  file:
+    path: "{{ to_conf_installdir }}/ldap.conf"
+    state: absent
+  when: not to_ldap_setup
+
+- name: Render Traffic Ops configuration files
+  template:
+    src: "{{item}}.j2"
+    owner: "{{ to_user }}"
+    group: "{{ to_group }}"
+    mode: 0600
+    dest: "{{ to_conf_installdir }}/{{item}}"
+  with_items:
+    - production/database.conf
+    - production/log4perl.conf
+    - production/riak.conf
+    - cdn.conf
+    - influxdb.conf
+  notify: Restart Traffic Ops
+
+- name: Render Traffic Ops LDAP configuration file
+  template:
+    src: "ldap.conf.j2"
+    owner: "{{ to_user }}"
+    group: "{{ to_group }}"
+    mode: 0600
+    dest: "{{ to_conf_installdir }}/ldap.conf"
+  notify: Restart Traffic Ops
+  when: to_ldap_setup
+
+- name: Upgrade TODB
+  command: ./db/admin -env=production upgrade
+  args:
+    chdir: "{{ to_app_installdir }}"
+  environment:
+    PATH: "{{ lookup('env', 'PATH') }}:{{ to_base_installdir }}/go/bin"
+    GOPATH: /opt/traffic_ops/go
+  failed_when:
+    (db_migrations_output.stdout.find("Can't run goose") != -1) or
+    (db_migrations_output.rc != 0)
+  run_once: true
+  register: db_migrations_output
+
+- name: Load Traffic Vault DB schema
+  command: ./db/admin --trafficvault -env=production load_schema
+  args:
+    chdir: "{{ to_app_installdir }}"
+  environment:
+    PATH: "{{ lookup('env', 'PATH') }}:{{ to_base_installdir }}/go/bin"
+    GOPATH: /opt/traffic_ops/go
+  run_once: true
+
+- name: Upgrade Traffic Vault DB
+  command: ./db/admin --trafficvault -env=production upgrade
+  args:
+    chdir: "{{ to_app_installdir }}"
+  environment:
+    PATH: "{{ lookup('env', 'PATH') }}:{{ to_base_installdir }}/go/bin"
+    GOPATH: /opt/traffic_ops/go
+  run_once: true
+
+- name: Initialize Riak SOLR
+  block:
+    # Riak has problems communicating with modern web security and doesn't properly negotiate TLS protocols and ciphers
+    # https://github.com/basho/riak/issues/918 maybe addressed part of the issue, but it was after the last published 2.2.3 release artifact for riak kv
+    - name: Add search schema - workaround for disabling tls 1.2 for riak
+      command:
+        argv: "{{ curl_base_args + command_args }}"
+      become: yes
+      no_log: true
+      vars:
+        riak_schema_file: /opt/traffic_ops/app/conf/misc/riak_search/sslkeys.xml
+        command_args:
+          - -H
+          - 'Content-Type: application/xml'
+          - -T
+          - "{{ riak_schema_file }}"
+          - "{{ to_riak_uri }}/search/schema/sslkeys"
+
+
+    - name: Add search index - workaround for disabling tls 1.2 for riak
+      command:
+        argv: "{{ curl_base_args + command_args }}"
+      become: yes
+      no_log: true
+      vars:
+        payload:
+          schema: sslkeys
+        command_args:
+          - -H
+          - 'Content-Type: application/json'
+          - -X
+          - PUT
+          - -d
+          - "{{ payload | to_json }}"
+          - "{{ to_riak_uri }}/search/index/sslkeys"
+
+    - name: Associate search index to bucket - workaround for disabling tls 1.2 for riak
+      command:
+        argv: "{{ curl_base_args + command_args }}"
+      become: yes
+      no_log: true
+      vars:
+        payload:
+          props:
+            search_index: sslkeys
+        command_args:
+          - -H
+          - 'Content-Type: application/json'
+          - -X
+          - PUT
+          - -d
+          - "{{ payload | to_json }}"
+          - "{{ to_riak_uri }}/buckets/ssl/props"
+  run_once: true
+  vars:
+    curl_base_args:
+      - curl
+      - --fail
+      - --tlsv1.1
+      - --tlsv1.0
+      - --insecure
+      - --basic
+      - --user
+      - "{{ to_riak_admin_username }}:{{ to_riak_admin_username_password }}"
+      - -s

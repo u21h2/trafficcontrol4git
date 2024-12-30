@@ -1,0 +1,47 @@
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<mat-card appearance="outlined" class="page-content single-column">
+	<tp-loading *ngIf="!asn"></tp-loading>
+	<form ngNativeValidate (ngSubmit)="submit($event)" *ngIf="asn">
+		<mat-card-content class="container">
+			<mat-form-field *ngIf="!isNew">
+				<mat-label>ID</mat-label>
+				<input matInput type="text" name="id" disabled readonly [defaultValue]="asn.id" />
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>ASN</mat-label>
+				<input matInput type="number" name="asn" required [(ngModel)]="asn.asn" />
+			</mat-form-field>
+			<mat-form-field>
+				<mat-label>Cache Group</mat-label>
+				<mat-select name="cachegroup" [(ngModel)]="asn.cachegroupId" required>
+					<mat-option *ngFor="let cachegroup of cacheGroups" [value]="cachegroup.id">{{cachegroup.name}}</mat-option>
+				</mat-select>
+				<mat-hint>
+					<a mat-icon-button [disabled]="!asn.cachegroupId" class="small-icon-button" matTooltip="View Cache Group Details" aria-label="View Cache Group Details" color="primary" [routerLink]="'/core/cache-groups/' + asn.cachegroupId" target="_blank">
+						<mat-icon>link</mat-icon>
+					</a>
+				</mat-hint>
+			</mat-form-field>
+			<mat-form-field *ngIf="!isNew">
+				<mat-label>Last Updated</mat-label>
+				<input matInput type="text" name="lastUpdated" disabled readonly [defaultValue]="asn.lastUpdated" /> </mat-form-field>
+		</mat-card-content>
+		<mat-card-actions align="end">
+			<button mat-raised-button type="button" *ngIf="!isNew" color="warn" (click)="deleteAsn()">Delete</button>
+			<button mat-raised-button type="submit" color="primary">Save</button>
+		</mat-card-actions>
+	</form>
+</mat-card>

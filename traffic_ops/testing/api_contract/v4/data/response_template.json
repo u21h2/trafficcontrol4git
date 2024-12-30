@@ -1,0 +1,2305 @@
+{
+    "type": "object",
+    "cdns": {
+        "type": "object",
+        "required": [
+            "dnssecEnabled",
+            "domainName",
+            "id",
+            "lastUpdated",
+            "name"
+        ],
+        "properties": {
+            "dnssecEnabled": {
+                "type": "boolean"
+            },
+            "domainName": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            }
+        }
+    },
+    "cachegroup": {
+        "type": "object",
+        "required": [
+            "id",
+            "name",
+            "shortName",
+            "latitude",
+            "longitude",
+            "parentCachegroupName",
+            "parentCachegroupId",
+            "secondaryParentCachegroupName",
+            "secondaryParentCachegroupId",
+            "fallbackToClosest",
+            "localizationMethods",
+            "typeName",
+            "typeId",
+            "lastUpdated",
+            "fallbacks"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "name": {
+                "type": "string"
+            },
+            "shortName": {
+                "type": "string"
+            },
+            "latitude": {
+                "type": "number"
+            },
+            "longitude": {
+                "type": "number"
+            },
+            "parentCachegroupName": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "parentCachegroupId": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "secondaryParentCachegroupName": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "secondaryParentCachegroupId": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "fallbackToClosest": {
+                "type": "boolean"
+            },
+            "localizationMethods": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "typeName": {
+                "type": "string"
+            },
+            "typeId": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "fallbacks": {
+                "type": "array",
+                "items": {}
+            }
+        }
+    },
+    "parameters": {
+        "type": "object",
+        "required": [
+            "configFile",
+            "id",
+            "lastUpdated",
+            "name",
+            "profiles",
+            "secure",
+            "value"
+        ],
+        "properties": {
+            "configFile": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "profiles": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "secure": {
+                "type": "boolean"
+            },
+            "value": {
+                "type": "string"
+            }
+        }
+    },
+    "roles": {
+        "type": "object",
+        "required": [
+            "name",
+            "permissions",
+            "description",
+            "lastUpdated"
+        ],
+        "properties": {
+            "name": {
+                "type": "string"
+            },
+            "permissions": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "description": {
+                "type": "string"
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "profiles": {
+        "type": "object",
+        "required": [
+            "id",
+            "lastUpdated",
+            "name",
+            "description",
+            "cdnName",
+            "cdn",
+            "routingDisabled",
+            "type"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "cdnName": {
+                "type": "string"
+            },
+            "cdn": {
+                "type": "integer"
+            },
+            "routingDisabled": {
+                "type": "boolean"
+            },
+            "type": {
+                "type": "string"
+            }
+        }
+    },
+    "server_capabilities": {
+        "type": "object",
+        "required": [
+            "name",
+            "lastUpdated"
+        ],
+        "properties": {
+            "name": {
+                "type": "string"
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "tenants": {
+        "type": "object",
+        "required": [
+            "id",
+            "name",
+            "active",
+            "lastUpdated",
+            "parentId"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "name": {
+                "type": "string"
+            },
+            "active": {
+                "type": "boolean"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "parentId": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "parentName": {
+                "type": "string"
+            }
+        }
+    },
+    "divisions": {
+        "type": "object",
+        "required": [
+            "id",
+            "lastUpdated",
+            "name"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            }
+        }
+    },
+    "regions": {
+        "type": "object",
+        "required": [
+            "divisionName",
+            "division",
+            "id",
+            "lastUpdated",
+            "name"
+        ],
+        "properties": {
+            "divisionName": {
+                "type": "string"
+            },
+            "division": {
+                "type": "integer"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            }
+        }
+    },
+    "phys_locations": {
+        "type": "object",
+        "required": [
+            "address",
+            "city",
+            "comments",
+            "email",
+            "id",
+            "lastUpdated",
+            "name",
+            "phone",
+            "poc",
+            "regionId",
+            "region",
+            "shortName",
+            "state",
+            "zip"
+        ],
+        "properties": {
+            "address": {
+                "type": "string"
+            },
+            "city": {
+                "type": "string"
+            },
+            "comments": {
+                "type": "string"
+            },
+            "email": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "phone": {
+                "type": "string"
+            },
+            "poc": {
+                "type": "string"
+            },
+            "regionId": {
+                "type": "integer"
+            },
+            "region": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "shortName": {
+                "type": "string"
+            },
+            "state": {
+                "type": "string"
+            },
+            "zip": {
+                "type": "string"
+            }
+        }
+    },
+    "servers": {
+        "type": "object",
+        "required": [
+            "cachegroup",
+            "cachegroupId",
+            "cdnId",
+            "cdnName",
+            "domainName",
+            "guid",
+            "hostName",
+            "httpsPort",
+            "id",
+            "iloIpAddress",
+            "iloIpGateway",
+            "iloIpNetmask",
+            "iloPassword",
+            "iloUsername",
+            "lastUpdated",
+            "mgmtIpAddress",
+            "mgmtIpGateway",
+            "mgmtIpNetmask",
+            "offlineReason",
+            "physLocation",
+            "physLocationId",
+            "profileNames",
+            "rack",
+            "revalPending",
+            "status",
+            "statusId",
+            "tcpPort",
+            "type",
+            "typeId",
+            "updPending",
+            "xmppId",
+            "xmppPasswd",
+            "interfaces",
+            "statusLastUpdated",
+            "configUpdateTime",
+            "configApplyTime",
+            "revalUpdateTime",
+            "revalApplyTime"
+        ],
+        "properties": {
+            "cachegroup": {
+                "type": "string"
+            },
+            "cachegroupId": {
+                "type": "integer"
+            },
+            "cdnId": {
+                "type": "integer"
+            },
+            "cdnName": {
+                "type": "string"
+            },
+            "domainName": {
+                "type": "string"
+            },
+            "guid": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "hostName": {
+                "type": "string"
+            },
+            "httpsPort": {
+                "type": "integer"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "iloIpAddress": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "iloIpGateway": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "iloIpNetmask": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "iloPassword": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "iloUsername": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "mgmtIpAddress": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "mgmtIpGateway": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "mgmtIpNetmask": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "offlineReason": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "physLocation": {
+                "type": "string"
+            },
+            "physLocationId": {
+                "type": "integer"
+            },
+            "profileNames": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "rack": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "revalPending": {
+                "type": "boolean"
+            },
+            "status": {
+                "type": "string"
+            },
+            "statusId": {
+                "type": "integer"
+            },
+            "tcpPort": {
+                "type": "integer"
+            },
+            "type": {
+                "type": "string"
+            },
+            "typeId": {
+                "type": "integer"
+            },
+            "updPending": {
+                "type": "boolean"
+            },
+            "xmppId": {
+                "type": "string"
+            },
+            "xmppPasswd": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "interfaces": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "ipAddresses",
+                        "maxBandwidth",
+                        "monitor",
+                        "mtu",
+                        "name",
+                        "routerHostName",
+                        "routerPortName"
+                    ],
+                    "properties": {
+                        "ipAddresses": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "address",
+                                    "gateway",
+                                    "serviceAddress"
+                                ],
+                                "properties": {
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "gateway": {
+                                        "type": "string"
+                                    },
+                                    "serviceAddress": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        },
+                        "maxBandwidth": {
+                            "type": [
+                                "null",
+                                "integer"
+                            ]
+                        },
+                        "monitor": {
+                            "type": "boolean"
+                        },
+                        "mtu": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "routerHostName": {
+                            "type": "string"
+                        },
+                        "routerPortName": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "statusLastUpdated": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "configUpdateTime": {
+                "type": "string"
+            },
+            "configApplyTime": {
+                "type": "string"
+            },
+            "revalUpdateTime": {
+                "type": "string"
+            },
+            "revalApplyTime": {
+                "type": "string"
+            }
+        }
+    },
+    "statuses": {
+        "type": "object",
+        "required": [
+            "description",
+            "name",
+            "id",
+            "lastUpdated"
+        ],
+        "properties": {
+            "description": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_services": {
+        "type": "object",
+        "required": [
+            "maxRequestHeaderBytes",
+            "firstHeaderRewrite",
+            "innerHeaderRewrite",
+            "lastHeaderRewrite",
+            "serviceCategory",
+            "topology",
+            "ecsEnabled",
+            "rangeSliceBlockSize",
+            "consistentHashRegex",
+            "consistentHashQueryParams",
+            "maxOriginConnections",
+            "deepCachingType",
+            "fqPacingRate",
+            "signingAlgorithm",
+            "tenant",
+            "trResponseHeaders",
+            "trRequestHeaders",
+            "active",
+            "anonymousBlockingEnabled",
+            "ccrDnsTtl",
+            "cdnId",
+            "cdnName",
+            "checkPath",
+            "displayName",
+            "dnsBypassCname",
+            "dnsBypassIp",
+            "dnsBypassIp6",
+            "dnsBypassTtl",
+            "dscp",
+            "edgeHeaderRewrite",
+            "exampleURLs",
+            "geoLimit",
+            "geoLimitRedirectURL",
+            "geoProvider",
+            "globalMaxMbps",
+            "globalMaxTps",
+            "httpBypassFqdn",
+            "id",
+            "infoUrl",
+            "initialDispersion",
+            "ipv6RoutingEnabled",
+            "lastUpdated",
+            "logsEnabled",
+            "longDesc",
+            "matchList",
+            "maxDnsAnswers",
+            "midHeaderRewrite",
+            "missLat",
+            "missLong",
+            "multiSiteOrigin",
+            "originShield",
+            "orgServerFqdn",
+            "profileDescription",
+            "profileId",
+            "profileName",
+            "protocol",
+            "qstringIgnore",
+            "rangeRequestHandling",
+            "regexRemap",
+            "regionalGeoBlocking",
+            "remapText",
+            "routingName",
+            "signed",
+            "sslKeyVersion",
+            "tenantId",
+            "type",
+            "typeId",
+            "xmlId",
+            "tlsVersions",
+            "geoLimitCountries"
+        ],
+        "properties": {
+            "maxRequestHeaderBytes": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "firstHeaderRewrite": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "innerHeaderRewrite": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "lastHeaderRewrite": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "serviceCategory": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "topology": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "ecsEnabled": {
+                "type": "boolean"
+            },
+            "rangeSliceBlockSize": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "consistentHashRegex": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "consistentHashQueryParams": {
+                "type": "array",
+                "items": {}
+            },
+            "maxOriginConnections": {
+                "type": "integer"
+            },
+            "deepCachingType": {
+                "type": "string"
+            },
+            "fqPacingRate": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "signingAlgorithm": {
+                "type": [
+                    "null",
+                    "boolean"
+                ]
+            },
+            "tenant": {
+                "type": "string"
+            },
+            "trResponseHeaders": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "trRequestHeaders": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "active": {
+                "type": "boolean"
+            },
+            "anonymousBlockingEnabled": {
+                "type": "boolean"
+            },
+            "ccrDnsTtl": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "cdnId": {
+                "type": "integer"
+            },
+            "cdnName": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "checkPath": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "displayName": {
+                "type": "string"
+            },
+            "dnsBypassCname": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "dnsBypassIp": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "dnsBypassIp6": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "dnsBypassTtl": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "dscp": {
+                "type": "integer"
+            },
+            "edgeHeaderRewrite": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "exampleURLs": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "geoLimit": {
+                "type": "integer"
+            },
+            "geoLimitRedirectURL": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "geoProvider": {
+                "type": "integer"
+            },
+            "globalMaxMbps": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "globalMaxTps": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "httpBypassFqdn": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "id": {
+                "type": "integer"
+            },
+            "infoUrl": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "initialDispersion": {
+                "type": "integer"
+            },
+            "ipv6RoutingEnabled": {
+                "type": "boolean"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "logsEnabled": {
+                "type": "boolean"
+            },
+            "longDesc": {
+                "type": "string"
+            },
+            "matchList": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "setNumber": {
+                            "type": "integer"
+                        },
+                        "pattern": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "maxDnsAnswers": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "midHeaderRewrite": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "missLat": {
+                "type": "integer"
+            },
+            "missLong": {
+                "type": "integer"
+            },
+            "multiSiteOrigin": {
+                "type": "boolean"
+            },
+            "originShield": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "orgServerFqdn": {
+                "type": "string"
+            },
+            "profileDescription": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "profileId": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "profileName": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "protocol": {
+                "type": "integer"
+            },
+            "qstringIgnore": {
+                "type": "integer"
+            },
+            "rangeRequestHandling": {
+                "type": "integer"
+            },
+            "regexRemap": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "regionalGeoBlocking": {
+                "type": "boolean"
+            },
+            "remapText": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "routingName": {
+                "type": "string"
+            },
+            "signed": {
+                "type": "boolean"
+            },
+            "sslKeyVersion": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "tenantId": {
+                "type": "integer"
+            },
+            "type": {
+                "type": "string"
+            },
+            "typeId": {
+                "type": "integer"
+            },
+            "xmlId": {
+                "type": "string"
+            },
+            "tlsVersions": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "geoLimitCountries": {
+                "type": [
+                    "null",
+                    "array"
+                ]
+            }
+        }
+    },
+    "origins": {
+        "type": "object",
+        "required": [
+            "cachegroup",
+            "cachegroupId",
+            "coordinate",
+            "coordinateId",
+            "deliveryService",
+            "deliveryServiceId",
+            "fqdn",
+            "id",
+            "ip6Address",
+            "ipAddress",
+            "isPrimary",
+            "lastUpdated",
+            "name",
+            "port",
+            "profile",
+            "profileId",
+            "protocol",
+            "tenant",
+            "tenantId"
+        ],
+        "properties": {
+            "cachegroup": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "cachegroupId": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "coordinate": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "coordinateId": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "deliveryService": {
+                "type": "string"
+            },
+            "deliveryServiceId": {
+                "type": "integer"
+            },
+            "fqdn": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "ip6Address": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "ipAddress": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "isPrimary": {
+                "type": "boolean"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "port": {
+                "type": "integer"
+            },
+            "profile": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "profileId": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "protocol": {
+                "type": "string"
+            },
+            "tenant": {
+                "type": "string"
+            },
+            "tenantId": {
+                "type": "integer"
+            }
+        }
+    },
+    "asns": {
+        "type": "object",
+        "required": [
+            "asn",
+            "cachegroup",
+            "cachegroupId",
+            "id",
+            "lastUpdated"
+        ],
+        "properties": {
+            "asn": {
+                "type": "integer"
+            },
+            "cachegroup": {
+                "type": "string"
+            },
+            "cachegroupId": {
+                "type": "integer"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "jobs": {
+        "type": "object",
+        "required": [
+            "id",
+            "assetUrl",
+            "createdBy",
+            "deliveryService",
+            "ttlHours",
+            "invalidationType",
+            "startTime"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "assetUrl": {
+                "type": "string"
+            },
+            "createdBy": {
+                "type": "string"
+            },
+            "deliveryService": {
+                "type": "string"
+            },
+            "ttlHours": {
+                "type": "integer"
+            },
+            "invalidationType": {
+                "type": "string"
+            },
+            "startTime": {
+                "type": "string"
+            }
+        }
+    },
+    "coordinates": {
+        "type": "object",
+        "required": [
+            "id",
+            "name",
+            "latitude",
+            "longitude",
+            "lastUpdated"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "name": {
+                "type": "string"
+            },
+            "latitude": {
+                "type": "number"
+            },
+            "longitude": {
+                "type": "number"
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "users": {
+        "type": "object",
+        "required": [
+            "addressLine1",
+            "addressLine2",
+            "changeLogCount",
+            "city",
+            "company",
+            "country",
+            "email",
+            "fullName",
+            "gid",
+            "id",
+            "lastAuthenticated",
+            "lastUpdated",
+            "newUser",
+            "phoneNumber",
+            "postalCode",
+            "publicSshKey",
+            "registrationSent",
+            "role",
+            "stateOrProvince",
+            "tenant",
+            "tenantId",
+            "ucdn",
+            "uid",
+            "username"
+        ],
+        "properties": {
+            "addressLine1": {
+                "type": "string"
+            },
+            "addressLine2": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "changeLogCount": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "city": {
+                "type": "string"
+            },
+            "company": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "country": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "email": {
+                "type": "string"
+            },
+            "fullName": {
+                "type": "string"
+            },
+            "gid": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastAuthenticated": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "newUser": {
+                "type": "boolean"
+            },
+            "phoneNumber": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "postalCode": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "publicSshKey": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "registrationSent": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "role": {
+                "type": "string"
+            },
+            "stateOrProvince": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "tenant": {
+                "type": "string"
+            },
+            "tenantId": {
+                "type": "integer"
+            },
+            "ucdn": {
+                "type": "string"
+            },
+            "uid": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "username": {
+                "type": "string"
+            }
+        }
+    },
+    "topologies": {
+        "type": "object",
+        "required": [
+            "description",
+            "name",
+            "nodes",
+            "lastUpdated"
+        ],
+        "properties": {
+            "description": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            },
+            "nodes": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "cachegroup",
+                        "parents"
+                    ],
+                    "properties": {
+                        "cachegroup": {
+                            "type": "string"
+                        },
+                        "parents": {
+                            "type": [
+                                "array",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "steering": {
+        "type": "object",
+        "required": [
+            "deliveryService",
+            "deliveryServiceId",
+            "target",
+            "targetId",
+            "type",
+            "typeId",
+            "value"
+        ],
+        "properties": {
+            "deliveryService": {
+                "type": "string"
+            },
+            "deliveryServiceId": {
+                "type": "integer"
+            },
+            "target": {
+                "type": "string"
+            },
+            "targetId": {
+                "type": "integer"
+            },
+            "type": {
+                "type": "string"
+            },
+            "typeId": {
+                "type": "integer"
+            },
+            "value": {
+                "type": "integer"
+            }
+        }
+    },
+    "cdn_locks": {
+        "type": "object",
+        "required": [
+            "userName",
+            "cdn",
+            "message",
+            "soft",
+            "sharedUserNames",
+            "lastUpdated"
+        ],
+        "properties": {
+            "userName": {
+                "type": "string"
+            },
+            "cdn": {
+                "type": "string"
+            },
+            "message": {
+                "type": "string"
+            },
+            "soft": {
+                "type": "boolean"
+            },
+            "sharedUserNames": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "lastUpdated": {
+                "type": "string"
+            }
+        }
+    },
+    "cdn_notifications": {
+        "type": "object",
+        "required": [
+            "id",
+            "cdn",
+            "lastUpdated",
+            "notification",
+            "user"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "cdn": {
+                "type": "string"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "notification": {
+                "type": "string"
+            },
+            "user": {
+                "type": "string"
+            }
+        }
+    },
+    "deliveryservice_requests": {
+        "type": "object",
+        "required": [
+            "assignee",
+            "author",
+            "changeType",
+            "createdAt",
+            "id",
+            "lastEditedBy",
+            "lastUpdated",
+            "original",
+            "requested",
+            "status"
+        ],
+        "properties": {
+            "assignee": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "author": {
+                "type": "string"
+            },
+            "changeType": {
+                "type": "string"
+            },
+            "createdAt": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastEditedBy": {
+                "type": "string"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "original": {
+                "$ref": "#/delivery_services"
+            },
+            "requested": {
+                "$ref": "#/delivery_services"
+            },
+            "status": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_service_sslkeys": {
+        "type": "object",
+        "required": [
+            "certificate",
+            "deliveryservice",
+            "cdn",
+            "businessUnit",
+            "city",
+            "organization",
+            "hostname",
+            "country",
+            "state",
+            "version",
+            "expiration"
+        ],
+        "properties": {
+            "certificate": {
+                "type": "object",
+                "required": [
+                    "crt",
+                    "key",
+                    "csr"
+                ],
+                "properties": {
+                    "crt": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "csr": {
+                        "type": "string"
+                    }
+                }
+            },
+            "deliveryservice": {
+                "type": "string"
+            },
+            "cdn": {
+                "type": "string"
+            },
+            "businessUnit": {
+                "type": "string"
+            },
+            "city": {
+                "type": "string"
+            },
+            "organization": {
+                "type": "string"
+            },
+            "hostname": {
+                "type": "string"
+            },
+            "country": {
+                "type": "string"
+            },
+            "state": {
+                "type": "string"
+            },
+            "version": {
+                "type": "integer"
+            },
+            "expiration": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_services_regex": {
+        "type": "object",
+        "required": [
+            "id",
+            "type",
+            "typeName",
+            "setNumber",
+            "pattern"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "type": {
+                "type": "integer"
+            },
+            "typeName": {
+                "type": "string"
+            },
+            "setNumber": {
+                "type": "integer"
+            },
+            "pattern": {
+                "type": "string"
+            }
+        }
+    },
+    "profile_parameters": {
+        "type": "object",
+        "required": [
+            "lastUpdated",
+            "profile",
+            "parameter"
+        ],
+        "properties": {
+            "lastUpdated": {
+                "type": "string"
+            },
+            "profile": {
+                "type": "string"
+            },
+            "parameter": {
+                "type": "integer"
+            }
+        }
+    },
+    "delivery_service_request_comments": {
+        "type": "object",
+        "required": [
+            "authorId",
+            "author",
+            "deliveryServiceRequestId",
+            "id",
+            "lastUpdated",
+            "value",
+            "xmlId"
+        ],
+        "properties": {
+            "authorId": {
+                "type": "integer"
+            },
+            "author": {
+                "type": "string"
+            },
+            "deliveryServiceRequestId": {
+                "type": "integer"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "value": {
+                "type": "string"
+            },
+            "xmlId": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_service_required_capabilities": {
+        "type": "object",
+        "required": [
+            "deliveryServiceID",
+            "lastUpdated",
+            "requiredCapability"
+        ],
+        "properties": {
+            "deliveryServiceID": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "requiredCapability": {
+                "type": "string"
+            }
+        }
+    },
+    "cdn_federation": {
+        "definitions": {
+            "deliveryService": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "xmlId"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "xmlId": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "allOf": [
+            {
+                "type": "object",
+                "required": [
+                    "id",
+                    "cname",
+                    "ttl",
+                    "description",
+                    "lastUpdated"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "cname": {
+                        "type": "string"
+                    },
+                    "ttl": {
+                        "type": "integer"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "lastUpdated": {
+                        "type": "string"
+                    }
+                }
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "deliveryService": {
+                        "$ref": "#/definitions/deliveryService"
+                    }
+                }
+            }
+        ]
+    },
+    "user_federation": {
+        "type": "object",
+        "required": [
+            "fullName",
+            "email",
+            "id",
+            "role",
+            "company",
+            "username"
+        ],
+        "properties": {
+            "fullName": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "email": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "id": {
+                "type": "integer"
+            },
+            "role": {
+                "type": "string"
+            },
+            "company": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "username": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_service_federation": {
+        "type": "object",
+        "required": [
+            "id",
+            "cdn",
+            "type",
+            "xmlId"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "cdn": {
+                "type": "string"
+            },
+            "type": {
+                "type": "string"
+            },
+            "xmlId": {
+                "type": "string"
+            }
+        }
+    },
+    "service_category": {
+        "type": "object",
+        "required": [
+            "lastUpdated",
+            "name"
+        ],
+        "properties": {
+            "lastUpdated": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string"
+            }
+        }
+    },
+    "federation_resolver": {
+        "type": "object",
+        "required": [
+            "id",
+            "ipAddress",
+            "lastUpdated",
+            "type"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "ipAddress": {
+                "type": "string"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "type": {
+                "type": "string"
+            }
+        }
+    },
+    "federation_federation_resolver": {
+        "type": "object",
+        "required": [
+            "id",
+            "ipAddress",
+            "type"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "ipAddress": {
+                "type": "string"
+            },
+            "type": {
+                "type": "string"
+            }
+        }
+    },
+    "delivery_service_capacity": {
+        "type": "object",
+        "required": [
+            "availablePercent",
+            "unavailablePercent",
+            "utilizedPercent",
+            "maintenancePercent"
+        ],
+        "properties": {
+            "availablePercent": {
+                "type": "number"
+            },
+            "unavailablePercent": {
+                "type": "integer"
+            },
+            "utilizedPercent": {
+                "type": "number"
+            },
+            "maintenancePercent": {
+                "type": "integer"
+            }
+        }
+    },
+    "delivery_service_health": {
+        "type": "object",
+        "required": [
+            "totalOffline",
+            "totalOnline",
+            "cachegroups"
+        ],
+        "properties": {
+            "totalOffline": {
+                "type": "integer"
+            },
+            "totalOnline": {
+                "type": "integer"
+            },
+            "cachegroups": {
+                "type": [
+                    "array",
+                    "null"
+                ],
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "offline",
+                        "name",
+                        "online"
+                    ],
+                    "properties": {
+                        "offline": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "online": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "delivery_service_routing": {
+        "type": "object",
+        "required": [
+            "cz",
+            "deepCz",
+            "dsr",
+            "err",
+            "fed",
+            "geo",
+            "miss",
+            "regionalAlternate",
+            "regionalDenied",
+            "staticRoute"
+        ],
+        "properties": {
+            "cz": {
+                "type": "integer"
+            },
+            "deepCz": {
+                "type": "number"
+            },
+            "dsr": {
+                "type": "integer"
+            },
+            "err": {
+                "type": "integer"
+            },
+            "fed": {
+                "type": "number"
+            },
+            "geo": {
+                "type": "integer"
+            },
+            "miss": {
+                "type": "number"
+            },
+            "regionalAlternate": {
+                "type": "integer"
+            },
+            "regionalDenied": {
+                "type": "integer"
+            },
+            "staticRoute": {
+                "type": "integer"
+            }
+        }
+    },
+    "static_dns_entries": {
+        "type": "object",
+        "required": [
+            "address",
+            "cachegroup",
+            "cachegroupId",
+            "deliveryservice",
+            "deliveryserviceId",
+            "host",
+            "id",
+            "lastUpdated",
+            "ttl",
+            "type",
+            "typeId"
+        ],
+        "properties": {
+            "address": {
+                "type": "string"
+            },
+            "cachegroup": {
+                "type": [
+                    "null",
+                    "string"
+                ]
+            },
+            "cachegroupId": {
+                "type": [
+                    "null",
+                    "integer"
+                ]
+            },
+            "deliveryservice": {
+                "type": "string"
+            },
+            "deliveryserviceId": {
+                "type": "integer"
+            },
+            "host": {
+                "type": "string"
+            },
+            "id": {
+                "type": "integer"
+            },
+            "lastUpdated": {
+                "type": "string"
+            },
+            "ttl": {
+                "type": "integer"
+            },
+            "type": {
+                "type": "string"
+            },
+            "typeId": {
+                "type": "integer"
+            }
+        }
+    },
+    "cdn_health": {
+        "type": "object",
+        "required": [
+            "totalOffline",
+            "totalOnline",
+            "cachegroups"
+        ],
+        "properties": {
+            "totalOffline": {
+                "type": "integer"
+            },
+            "totalOnline": {
+                "type": "integer"
+            },
+            "cachegroups": {
+                "anyOf": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "offline",
+                                "name",
+                                "online"
+                            ],
+                            "properties": {
+                                "offline": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "online": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            }
+        }
+    },
+    "cdn_routing": {
+        "type": "object",
+        "required": [
+            "cz",
+            "deepCz",
+            "dsr",
+            "err",
+            "fed",
+            "geo",
+            "miss",
+            "regionalAlternate",
+            "regionalDenied",
+            "staticRoute"
+        ],
+        "properties": {
+            "cz": {
+                "type": "integer"
+            },
+            "deepCz": {
+                "type": "number"
+            },
+            "dsr": {
+                "type": "integer"
+            },
+            "err": {
+                "type": "integer"
+            },
+            "fed": {
+                "type": "number"
+            },
+            "geo": {
+                "type": "integer"
+            },
+            "miss": {
+                "type": "number"
+            },
+            "regionalAlternate": {
+                "type": "integer"
+            },
+            "regionalDenied": {
+                "type": "integer"
+            },
+            "staticRoute": {
+                "type": "integer"
+            }
+        }
+    },
+    "server_server_capabilities": {
+        "type": "object",
+        "required": [
+            "lastUpdated",
+            "serverHostName",
+            "serverId",
+            "serverCapability"
+        ],
+        "properties": {
+            "lastUpdated": {
+                "type": "string"
+            },
+            "serverHostName": {
+                "type": "string"
+            },
+            "serverId": {
+                "type": "integer"
+            },
+            "serverCapability": {
+                "type": "string"
+            }
+        }
+    },
+    "system_info": {
+        "type": "object",
+        "required": [
+            "parameters"
+        ],
+        "properties": {
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "tm.instance_name",
+                    "tm.toolname"
+                ],
+                "properties": {
+                    "default_geo_miss_latitude": {
+                        "type": "string"
+                    },
+                    "default_geo_miss_longitude": {
+                        "type": "string"
+                    },
+                    "tm.infourl": {
+                        "type": "string"
+                    },
+                    "tm.instance_name": {
+                        "type": "string"
+                    },
+                    "tm.toolname": {
+                        "type": "string"
+                    },
+                    "tm.url": {
+                        "type": "string"
+                    },
+                    "use_reval_pending": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "logs":{
+        "type": "object",
+        "required": [
+            "ticketNum",
+            "level",
+            "lastUpdated",
+            "user",
+            "id",
+            "message"
+        ],
+        "properties": {
+            "ticketNum": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "level": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "lastUpdated": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "user": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "id": {
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "message": {
+                "type": [
+                    "string",
+                    "null"
+                ]
+            }
+        }
+    }
+}

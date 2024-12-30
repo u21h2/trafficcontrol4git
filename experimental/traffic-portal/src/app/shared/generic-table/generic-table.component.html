@@ -1,0 +1,72 @@
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<div class="extra-actions">
+	<button mat-flat-button type="button" title="select all rows" (click)="selectAll()">Select All</button>
+	<button mat-flat-button type="button" title="de-select all rows" (click)="selectAll(true)">De-Select All</button>
+	<button mat-flat-button type="button" title="clear all active filters" (click)="clearFilters()"><mat-icon>filter_list</mat-icon> Clear</button>
+	<button mat-flat-button type="button"*ngFor="let btn of tableTitleButtons" (click)="emitTitleButtonAction(btn.action)">{{btn.text}}</button>
+	<div class="toggle-columns" role="group" title="Select Table Columns">
+		<button type="button" mat-flat-button [matMenuTriggerFor]="menu" #trigger="matMenuTrigger">
+			<mat-icon>view_column</mat-icon>&nbsp;
+			<mat-icon class="caret" [ngClass]="{'rotate': trigger.menuOpen}">expand_more</mat-icon>
+		</button>
+		<mat-menu #menu="matMenu">
+			<div class="column-menu">
+				<button type="button" mat-menu-item *ngFor="let c of columns" (click)="toggleVisibility($event, c.getColId())">
+					<mat-checkbox [checked]="c.isVisible()" [name]="c.getColDef().headerName">
+						{{c.getColDef().headerName}}
+					</mat-checkbox>
+				</button>
+			</div>
+		</mat-menu>
+	</div>
+	<div class="toggle-columns" role="group" title="Extra Table Actions">
+		<button type="button" mat-flat-button [matMenuTriggerFor]="extraMenu" #extraTrigger="matMenuTrigger">
+			<mat-icon>menu_open</mat-icon>
+			<mat-icon class="caret" [ngClass]="{'rotate': extraTrigger.menuOpen}">expand_more</mat-icon>
+		</button>
+		<mat-menu #extraMenu="matMenu">
+			<button mat-menu-item type="button" *ngFor="let btn of moreMenuButtons" (click)="emitMoreButtonAction(btn.action)">{{btn.text}}</button>
+			<mat-divider></mat-divider>
+			<button mat-menu-item type="button" (click)="download()" title="save as CSV">Export Grid</button>
+			<button mat-menu-item type="button" (click)="gridAPI.sizeColumnsToFit()">Resize</button>
+		</mat-menu>
+	</div>
+</div>
+<ag-grid-angular
+	[rowData]="data"
+	[columnDefs]="cols"
+	class="ag-theme-material"
+	[components]="components"
+	[gridOptions]="gridOptions"
+	(gridReady)="setAPI($event)"
+	(filterChanged)="storeFilter($event)"
+	(sortChanged)="storeColumns()"
+	(columnMoved)="storeColumns()"
+	(columnVisible)="storeColumns(true)"
+	(cellContextMenu)="onCellContextMenu($event)"
+	(contextmenu)="preventDefault($event)">
+</ag-grid-angular>
+
+<menu #contextmenu type="contextmenu" [hidden]="!showContextMenu" [ngStyle]="menuStyle" *ngIf="contextMenuItems && contextMenuItems.length > 0">
+	<ul>
+		<li *ngFor="let item of contextMenuItems" role="menuitem">
+			<ng-container *ngIf="!isAction(item)">
+				<a *ngIf="!isDisabled(item)" [routerLink]="href(item)" [queryParams]="queryParameters(item)" [fragment]="fragment(item)" [target]="item.newTab ? '_blank' : '_self'">{{item.name}}</a>
+				<button type="button" *ngIf="isDisabled(item)" disabled>{{item.name}}</button>
+			</ng-container>
+			<button name="{{itemName(item)}}" *ngIf="isAction(item)" type="button" (click)="emitContextMenuAction(item.action, item.multiRow, $event)" [disabled]="isDisabled(item)">{{item.name}}</button>
+		</li>
+	</ul>
+</menu>

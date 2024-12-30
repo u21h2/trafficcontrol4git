@@ -1,0 +1,390 @@
+@charset "UTF-8";
+
+/*
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+*/
+
+@supports not(-moz-animation: auto) {
+	math {
+		mfenced::before {
+			content: "(";
+		}
+		mfenced::after {
+			content: ")";
+		}
+		mfenced[open]::before {
+			content: attr(open);
+		}
+		mfenced[close]::after {
+			content: attr(close);
+		}
+
+		ms::before {
+			content: open-quote;
+		}
+		ms::after {
+			content: close-quote;
+		}
+	}
+}
+
+select.has-error {
+    border-color: #a94442;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+/* Shim for forms without bootstrap */
+.has-error {
+	color: #a94442;
+
+	input, select, textarea {
+		box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	}
+}
+
+.bordered-item {
+	border-bottom: 1px solid gray;
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+}
+
+button.right-button {
+	float: right;
+}
+
+.form-control-columns {
+	display: grid;
+	grid-template-columns: 16.66666667% auto;
+	grid-row-gap: 15px;
+
+	label {
+		text-align: right;
+		padding-right: 2em;
+		line-height: 2.4;
+	}
+
+	fieldset {
+		grid-column: 2;
+
+		div, li {
+			display: grid;
+			grid-template-columns: auto 1fr;
+		}
+
+		div {
+			grid-column-gap: 20px;
+		}
+
+		li {
+			grid-column-gap: 10px;
+		}
+
+		small.input-error, small.input-warning {
+			grid-column: 2;
+		}
+
+		input[type="checkbox"] {
+			align-self: center;
+			justify-self: start;
+		}
+	}
+}
+
+.btn-link.request-status {
+	font-size: 20px;
+	color: #cd1323;
+}
+
+.dnssec-info-text {
+	margin-bottom: 12px;
+	font-size: medium;
+}
+
+/******* tooltip styling *******/
+form .has-tooltip {
+	text-decoration: underline dotted;
+	position: relative;
+	cursor: help;
+
+	div.helptooltip {
+		visibility: hidden;
+		text-decoration: none;
+		max-width: 276px;
+		position: absolute;
+		bottom: 2em;
+		padding-bottom: 1em;
+		z-index: 3;
+		color: default;
+		background-color: transparent;
+		transition: opacity 0.2s ease-in-out;
+		transition: bottom 0.2s cubic-bezier(0.075, 0.75, 0.875, 0.36);
+		color: #73879C;
+		text-align: left;
+
+		div.helptext {
+			background-color: white;
+			padding: 10px;
+			border-radius: 6px;
+			box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+			width: max-content;
+			max-width: inherit;
+			cursor: auto;
+			line-height: 1.428;
+		}
+	}
+
+	&:hover div.helptooltip {
+		display: block;
+		visibility: visible;
+		opacity: 1;
+		bottom: 1em;
+	}
+
+	&:hover div.helptext::after {
+		content: " ";
+		position: absolute;
+		border-color: white transparent transparent;
+		border-style: solid;
+		border-width: 5px;
+		bottom: 3px;
+	}
+}
+
+small.invalid-URL-error {
+	display: none;
+	visibility: hidden;
+}
+
+input[type="url"]:invalid ~ small.invalid-URL-error {
+	display: inline-block;
+	visibility: visible;
+}
+
+textarea.autosize:read-only {
+	overflow: hidden;
+}
+
+.dnssec-info-text {
+	margin-bottom: 12px;
+	font-size: medium;
+}
+
+.add-more-inputs {
+	margin-bottom: 0;
+	.btn {
+		margin-right: 0;
+	}
+}
+
+@media (min-width: 768px) {
+	form .has-tooltip {
+		div.helptooltip {
+			left: calc(100% - 140px);
+		}
+
+		&:hover div.helptext::after {
+			left: 40%;
+		}
+	}
+}
+
+@media (max-width: 767px) {
+	form .has-tooltip {
+		div.helptooltip {
+			left: 0;
+		}
+
+		&:hover div.helptext::after {
+			left: 20px;
+		}
+	}
+}
+
+/********** tooltip warnings **********/
+div.helptext aside.warning {
+	h6 {
+		color: white;
+		width: 100%;
+		background-color: #f0b37e;
+		margin-bottom: 0;
+		padding: 2px 5px;
+
+		&::before {
+			font-family: "FontAwesome";
+			content: " ";
+		}
+	}
+
+	p, dl, dt {
+		background: #ffedcc;
+		padding: 5px;
+		margin-bottom: 0;
+	}
+
+	em {
+		text-transform: uppercase;
+	}
+}
+
+/********** bootstrap overriding user-agent styling.... **********/
+dl dd {
+	margin-left: 50px;
+}
+
+/********** styling for showing diffs on a delivery service request **********/
+
+aside.current-value {
+	border: 1px solid #ddd;
+	margin: 10px;
+	padding: 10px;
+	position: relative;
+	border-radius: 4px;
+	background-color: #f5f5f5;
+	padding-left: 10px;
+	h3 {
+		width: 100%;
+		background-color: #3F5468;
+		color: white;
+		padding: 5px;
+		font-size: 13px;
+		margin-top: 10px;
+	}
+}
+
+#deliveryServiceForm, #deliveryServiceURLs {
+	fieldset {
+		margin: 0 0 20px 0;
+		legend {
+			font-size: 18px;
+			font-weight: bold;
+			.fa {
+				float: right;
+				margin-right: 10px;
+			}
+		}
+		legend.fieldset-error {
+			color: #a94442;
+		}
+	}
+}
+
+
+
+/********** true false slider ********/
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+
+  &::before {
+     position: absolute;
+     content: "";
+     height: 13px;
+     width: 13px;
+     left: 2px;
+     bottom: 2px;
+     background-color: white;
+     transition: .4s;
+   }
+}
+
+.slider.round {
+  border-radius: 17px;
+
+  &::before {
+    border-radius: 50%;
+  }
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider::before {
+  transform: translateX(13px);
+}
+
+.revealable-password-container {
+	display: flex;
+	justify-content: space-between;
+	padding: 0;
+	align-content: center;
+
+	> input {
+		appearance: none;
+		border: none;
+		flex: 1;
+		padding: 6px 12px;
+		color: inherit;
+		background: transparent;
+		line-height: inherit;
+		height: 100%;
+	}
+
+	> button {
+		width: 34px;
+		border: none;
+	}
+}
+
+.private-text {
+	color: transparent;
+	text-shadow: 0 0 8px rgba(0,0,0,0.5);
+
+	&:focus {
+		color: inherit;
+		text-shadow: none;
+	}
+}
+
+.checkbox-scroll-container {
+	max-height: 3.5em;
+	overflow-y: auto;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-content: space-between;
+
+	div {
+		min-width: 5em;
+		width: fit-content;
+	}
+}
+
+.label-underline {
+	text-decoration: underline dotted
+}

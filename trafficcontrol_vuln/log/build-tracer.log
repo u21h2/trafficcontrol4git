@@ -1,0 +1,50 @@
+[T 08:20:45 52509] CodeQL CLI version 2.20.0
+[T 08:20:45 52509] Initializing tracer.
+[T 08:20:45 52509] Initializing tags.
+[T 08:20:45 52509] ID set to 000000000000CD1D_0000000000000001 (parent root)
+[T 08:20:45 52509] Initializing tracer.
+[T 08:20:45 52509] Initializing tags.
+[T 08:20:45 52509] ID set to 000000000000CD1D_0000000000000002 (parent root)
+[T 08:20:45 52509] Warning: SEMMLE_EXEC and SEMMLE_EXECP not set. Falling back to path lookup on argv[0].
+[T 08:20:45 52509] ==== Candidate to intercept: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/tools/osx64/runner-osx (canonical: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/tools/osx64/runner-osx) ====
+[T 08:20:45 52509] Executing the following tracer actions:
+[T 08:20:45 52509] Tracer actions:
+[T 08:20:45 52509] pre_invocations(0)
+[T 08:20:45 52509] post_invocations(0)
+[T 08:20:45 52509] trace_languages(1): [go]
+[T 08:20:45 52510] Attempting to switch stdout/stderr to 3...
+/Users/test/Desktop/trafficcontrol/trafficcontrol_vuln/working/copy-root/000001F5/bin/sh.semmle.0000CD1D.30F45558.slice.x86_64: replacing existing signature
+[T 08:20:46 52509] Initializing tracer.
+[T 08:20:46 52509] Initializing tags.
+[T 08:20:46 52509] ID set to 000000000000CD1D_0000000000000003 (parent 000000000000CD1D_0000000000000002)
+[T 08:20:46 52509] ==== Candidate to intercept: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/go/tools/autobuild.sh (canonical: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/go/tools/autobuild.sh) ====
+[T 08:20:46 52509] Executing the following tracer actions:
+[T 08:20:46 52509] Tracer actions:
+[T 08:20:46 52509] pre_invocations(0)
+[T 08:20:46 52509] post_invocations(0)
+[T 08:20:46 52509] trace_languages(1): [go]
+[T 08:20:46 52523] Attempting to switch stdout/stderr to 3...
+/Users/test/Desktop/trafficcontrol/trafficcontrol_vuln/working/copy-root/000001F5/bin/bash.semmle.0000CD1D.1A4BE730.slice.x86_64: replacing existing signature
+[T 08:20:47 52509] Initializing tracer.
+[T 08:20:47 52509] Initializing tags.
+[T 08:20:47 52509] ID set to 000000000000CD1D_0000000000000004 (parent 000000000000CD1D_0000000000000003)
+[T 08:20:47 52509] ==== Candidate to intercept: /bin/bash (canonical: /bin/bash) ====
+[T 08:20:47 52509] Executing the following tracer actions:
+[T 08:20:47 52509] Tracer actions:
+[T 08:20:47 52509] pre_invocations(0)
+[T 08:20:47 52509] post_invocations(0)
+[T 08:20:47 52509] trace_languages(1): [go]
+[T 08:20:47 52534] Attempting to switch stdout/stderr to 3...
+/Users/test/Desktop/trafficcontrol/trafficcontrol_vuln/working/copy-root/000001F5/Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/go/tools/osx64/go-autobuilder.semmle.0000CD35.0643E990.slice.arm64: replacing existing signature
+[T 08:20:47 52533] Initializing tracer.
+[T 08:20:47 52533] Initializing tags.
+[T 08:20:47 52533] ID set to 000000000000CD35_0000000000000001 (parent 000000000000CD1D_0000000000000004)
+[T 08:20:47 52533] ==== Candidate to intercept: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/go/tools/osx64/go-autobuilder (canonical: /Users/test/Library/Application Support/Code/User/globalStorage/github.vscode-codeql/distribution4/codeql/go/tools/osx64/go-autobuilder) ====
+[T 08:20:48 52533] Lua: === Intercepted call to /users/test/library/application support/code/user/globalstorage/github.vscode-codeql/distribution4/codeql/go/tools/osx64/go-autobuilder ===
+[T 08:20:48 52533] Lua: Disabling tracing for language go.
+[T 08:20:48 52533] Executing the following tracer actions:
+[T 08:20:48 52533] Tracer actions:
+[T 08:20:48 52533] pre_invocations(0)
+[T 08:20:48 52533] post_invocations(0)
+[T 08:20:48 52533] trace_languages(0): []
+[T 08:20:48 52533] Disabling tracing for this command.

@@ -1,0 +1,57 @@
+/*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+.mat-mdc-card {
+	width: fit-content;
+	margin: 45px auto auto auto;
+	.mat-mdc-card-header {
+		display: grid;
+		grid-template-columns: 1fr auto auto 1fr;
+
+		img {
+			height: 5em;
+			width: 5em;
+			margin-bottom: 15px;
+		}
+		h1 {
+			vertical-align: text-bottom;
+		}
+	}
+
+	form {
+		margin: auto;
+		width: fit-content;
+		max-width: 85vw;
+		border-radius: 5px;
+		padding: 0;
+
+		.mat-mdc-form-field {
+			width: 100%;
+		}
+
+		.mat-mdc-card-actions {
+			margin-top: 5px;
+			grid-column: span 2;
+			display: grid;
+			grid-template-columns: auto auto 1fr;
+			grid-column-gap: 10px;
+
+			button {
+				justify-self: end;
+			}
+			button:first-child {
+				justify-self: baseline;
+			}
+		}
+	}
+}
